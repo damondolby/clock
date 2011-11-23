@@ -1,7 +1,7 @@
 #include <SDL/SDL.h>
 # include <stdlib.h>
 #include <SDL/SDL_ttf.h>
-#include "circle.h"
+#include "clockface.h"
 
 int Running;
 SDL_Surface *screen;
@@ -10,12 +10,14 @@ int NewTime;
 char TimeToDisplay[6];
 int scr_wid = 640;
 int scr_hi = 480;
+int mouse_x;
+int mouse_y;
 
 //void writeText2(char* txt, int x, int y);
 
 int main() {
 	
-	//gcc clock.c -lSDL -lSDL_ttf -o clock
+	//gcc clock.c clockface.c -lSDL -lSDL_ttf -o clock.out
 
 	init();
 	
@@ -49,7 +51,7 @@ int init() {
 	Running = 1;
 	NewTime = 0;
 	
-	draw_circle(screen, scr_wid, scr_hi);
+	draw_clock_face(screen, scr_wid, scr_hi);
 	
 	//writeText2("hey", 10, 10);
 	//writeText2("hey2222", 100, 100);
@@ -67,10 +69,34 @@ int events(SDL_Event *event) {
 			   case SDLK_RETURN:
 				   NewTime = 1;
 				break;					
+			   case SDLK_q:
+				Running = 0;
+				break;
 		      }
 		      break;
 		case SDL_KEYUP:				      
 			break;
+		
+		case SDL_MOUSEBUTTONDOWN: 
+			switch(event->button.button) {
+				case SDL_BUTTON_LEFT: 
+					mouse_x = event->motion.x;
+					mouse_y = event->motion.y;
+					//printf("left pressed. x:%d, y:%d\n", event->motion.x, event->motion.y);
+					//OnLButtonDown(Event->button.x,Event->button.y);
+					break;
+				
+				case SDL_BUTTON_RIGHT: 
+					//printf("right pressed");
+					//OnRButtonDown(Event->button.x,Event->button.y);
+					break;
+				
+				case SDL_BUTTON_MIDDLE: 
+				    //OnMButtonDown(Event->button.x,Event->button.y);
+				    break;
+				
+			break;
+        }
 	}
 
 }
@@ -104,6 +130,9 @@ int loop() {
 		m = getMinute();
 		len = hourMinToStr(h, m, TimeToDisplay);
 	}
+	
+	//check hand collision
+	
 }
 
 int render() {
