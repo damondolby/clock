@@ -84,6 +84,13 @@ int events(SDL_Event *event) {
 					mouse_y = event->motion.y;
 					//printf("left pressed. x:%d, y:%d\n", event->motion.x, event->motion.y);
 					//OnLButtonDown(Event->button.x,Event->button.y);
+					
+					//if (hand_collision(mouse_x, mouse_y))
+					//{
+					//	printf("yes!\n");
+					//}
+					handle_mouse_down(mouse_x, mouse_y);
+					
 					break;
 				
 				case SDL_BUTTON_RIGHT: 
@@ -93,10 +100,23 @@ int events(SDL_Event *event) {
 				
 				case SDL_BUTTON_MIDDLE: 
 				    //OnMButtonDown(Event->button.x,Event->button.y);
-				    break;
-				
+				    break;						
+			}
 			break;
-        }
+			
+		case SDL_MOUSEBUTTONUP: 
+			
+			switch(event->button.button) {
+				case SDL_BUTTON_LEFT:
+					
+					mouse_x = event->motion.x;
+					mouse_y = event->motion.y;
+				
+					handle_mouse_up(screen, mouse_x, mouse_y, scr_wid, scr_hi);
+					
+					break;			
+			}
+			break;
 	}
 
 }
