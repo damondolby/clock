@@ -23,13 +23,13 @@ typedef struct {
 } hand;
 
 
-coords *hour_hand[RADIUS];
+//coords *hour_hand[RADIUS];
 coords *min_hand[RADIUS];
 
 hand *hour;
 hand *minute;
 
-int hour_hand_moving = 0; //TODO: change so part of new 'hand struct'
+//int hour_hand_moving = 0; //TODO: change so part of new 'hand struct'
                                                                                 
 /* Begin draw_pixel. */
 void draw_pixel(SDL_Surface *screen, int x, int y, Uint8 R, Uint8 G, Uint8 B)
@@ -235,15 +235,17 @@ coords * point_new(int x, int y)
 }
 
 //TODO: change x and y to rx and ry to indicate centre of the circle
-void draw_hand(SDL_Surface *screen, int r, int x, int y, int hand_minute, coords** cs, Uint8 R, Uint8 G, Uint8 B)
+//void draw_hand(SDL_Surface *screen, int r, int x, int y, int hand_minute, coords** cs, Uint8 R, Uint8 G, Uint8 B)
+void draw_hand(SDL_Surface *screen, int r, int x, int y, hand* h, Uint8 R, Uint8 G, Uint8 B)
 {
 	int i;
 	float pi_factor;
+	int hand_minute;
 	
 	r = r - 50;
 	
 	//TODO: this is very hacky. Need to find a better way to convert cartesian coordinates (x and y) to polar coordinates  (radius and angle) of cicle from clock minute
-	hand_minute = hand_minute - 15;
+	hand_minute = h->minute - 15;
 	
 	pi_factor = M_PI * ((hand_minute * 6) / 180.0);
 	//printf("Sum: %f\n", (hand_minute * 6) / 180.0);
@@ -257,7 +259,7 @@ void draw_hand(SDL_Surface *screen, int r, int x, int y, int hand_minute, coords
 		//coords *coord  = {xc, yc};
 		coords *coord  = point_new(xc, yc);
 		//hour_hand[i] = &coord;
-		cs[i] = coord;
+		h->xy[i] = coord;
 		draw_pixel(screen, xc, yc, R, G, B);
 	}
 }
@@ -323,7 +325,12 @@ void draw_clock_face(SDL_Surface *screen, int scr_wid, int scr_hi)
 	  //draw_hand(screen, r, x, y, 15);
 	  //draw_hand(screen, r, x, y, 30);
 	  //draw_hand(screen, r, x, y, 45);
-	  draw_hand(screen, r, x, y, 22, hour_hand, 0, 255, 0);
+	  
+	  if((hour = malloc(sizeof *hour)) != NULL)
+	  {	  
+		  hour->minute = 22;
+		  draw_hand(screen, r, x, y, hour, 0, 255, 0);
+	  }
 	  
 	  int i2 = 29;
 	  //printf("%dth element - xc: %d, xy: %d\n", i2, hour_hand[i2]->x, hour_hand[i2]->y);
@@ -355,10 +362,10 @@ int hand_collision(int x, int y)
 	r = 0;
 	
 	printf("hx: %d, x: %d\n", x, y);
-	printf("5. %dth element: x=%d, y=%d\n", 10, hour_hand[10]->x, hour_hand[10]->y);
+	//printf("5. %dth element: x=%d, y=%d\n", 10, hour_hand[10]->x, hour_hand[10]->y);
 	
 	//TODO: change so it checks collision for both hands
-	for (i=0, c = hour_hand[i]; i<RADIUS && c != NULL; i++)
+	for (i=0, c = hour->xy[i]; i<RADIUS && c != NULL; i++)
 	{
 		//TODO: Need to modify this collision so more precise
 		//printf("hx: %d, x: %d\n", c->x, x);
@@ -368,7 +375,8 @@ int hand_collision(int x, int y)
 			(c->y >= y-3 || c->y <= y+3))
 		{
 			printf("hand collision!\n");
-			hour_hand_moving = 1;
+			//hour_hand_moving = 1;
+			hour->is_moving = 1;
 			r = 1;
 			break;
 		}
@@ -450,13 +458,12 @@ void handle_mouse_up(SDL_Surface *screen, int x, int y, int scr_wid, int scr_hi)
 {
 	//TODO: change so it checks collision for both hands
 	
-	if (hour_hand_moving == 1)
+	if (hour->is_moving == 1)
 	{
 		float angle = get_angle_from_coords(x, y, scr_wid, scr_hi);
 		//printf("1. mouse up after hand move attempt. Angle: %f, \n", angle);
 		int minute = convert_angle_to_clock_minute(angle);
-		//printf("20. mouse up after hand move attempt. Angle: %f, Minute: %d\n", angle, minute);
-		hour_hand_moving = 0;
+		//printf("20. mouse up after hand move attempt. Angle: %f, Minute: %d\n", angle, minute);		
 		
 		//draw_hand(screen, r, x, y, 30, hour_hand);
 		
@@ -466,11 +473,15 @@ void handle_mouse_up(SDL_Surface *screen, int x, int y, int scr_wid, int scr_hi)
 		int x = scr_wid/2;
 		int y = scr_hi - r - 20;
 		
-		printf("1. %dth element: x=%d, y=%d\n", 10, hour_hand[10]->x, hour_hand[10]->y);
-		draw_hand(screen, r, x, y, 22, hour_hand, 0, 0, 0);
-		printf("2. %dth element: x=%d, y=%d\n", 10, hour_hand[10]->x, hour_hand[10]->y);
-		draw_hand(screen, r, x, y,minute, hour_hand, 0, 255, 0);
-		printf("3. %dth element: x=%d, y=%d\n", 10, hour_hand[10]->x, hour_hand[10]->y);
+		//printf("1. %dth element: x=%d, y=%d\n", 10, hour_hand[10]->x, hour_hand[10]->y);
+		draw_hand(screen, r, x, y, hour, 0, 0, 0);
+		
+		hour->is_moving = 0;
+		hour->minute = minute;
+		
+		//printf("2. %dth element: x=%d, y=%d\n", 10, hour_hand[10]->x, hour_hand[10]->y);
+		draw_hand(screen, r, x, y,hour, 0, 255, 0);
+		//printf("3. %dth element: x=%d, y=%d\n", 10, hour_hand[10]->x, hour_hand[10]->y);
 	}
 }
 
