@@ -26,6 +26,9 @@ typedef struct {
 coords *hour_hand[RADIUS];
 coords *min_hand[RADIUS];
 
+hand *hour;
+hand *minute;
+
 int hour_hand_moving = 0; //TODO: change so part of new 'hand struct'
                                                                                 
 /* Begin draw_pixel. */
