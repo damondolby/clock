@@ -16,6 +16,12 @@ typedef struct {
 	int y;
 } coords;
 
+typedef struct {
+	coords *xy[RADIUS];
+	int minute;
+	int is_moving;	
+} hand;
+
 
 coords *hour_hand[RADIUS];
 coords *min_hand[RADIUS];
