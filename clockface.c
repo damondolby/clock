@@ -317,19 +317,18 @@ void draw_clock_face(SDL_Surface *screen, int scr_wid, int scr_hi)
 	  
 	/* end draw circle. */
 	  
-	 //add_hours(screen, r, x, y);
-	  
-	  //draw_hand(screen, r, x, y, 15);
-	  
-	  //draw_hand(screen, r, x, y, 0);
-	  //draw_hand(screen, r, x, y, 15);
-	  //draw_hand(screen, r, x, y, 30);
-	  //draw_hand(screen, r, x, y, 45);
+	 //add_hours(screen, r, x, y);	  
 	  
 	  if((hour = malloc(sizeof *hour)) != NULL)
 	  {	  
-		  hour->minute = 22;
+		  hour->minute = 50;
 		  draw_hand(screen, r, x, y, hour, 0, 255, 0);
+	  }
+	  
+	   if((minute = malloc(sizeof *minute)) != NULL)
+	  {	  
+		  minute->minute = 15;
+		  draw_hand(screen, r, x, y, minute, 0, 255, 0);
 	  }
 	  
 	  int i2 = 29;
@@ -337,46 +336,36 @@ void draw_clock_face(SDL_Surface *screen, int scr_wid, int scr_hi)
 	  i2 = 89;
 	  //printf("%dth element - xc: %d, xy: %d\n", i2, hour_hand[i2]->x, hour_hand[i2]->y);
 	  
-	  //draw_hand(screen, r, x, y, 5);
-	  //draw_hand(screen, r, x, y, 10);
-	  //draw_hand(screen, r, x, y, 15);
-	  //draw_hand(screen, r, x, y, 20);
-	  //draw_hand(screen, r, x, y, 25);
-	  //draw_hand(screen, r, x, y, 30);
-	  //draw_hand(screen, r, x, y, 35);
-	  //draw_hand(screen, r, x, y, 40);
-	  ////draw_hand(screen, r, x, y, 45, min_hand);
-	  //draw_hand(screen, r, x, y, 50);
-	  //draw_hand(screen, r, x, y, 55);
 	  add_numbers(screen, r, x, y);
 }
 
 /*If the co-ordinates are 'close' to either clock hands then return to true
 as 'colliding'
 */
-int hand_collision(int x, int y)
+int hand_collision(int x, int y, hand* h)
 {
 	int i, r;	
-	coords *c;
+	//coords *c;
 	
 	r = 0;
 	
-	printf("hx: %d, x: %d\n", x, y);
+	//printf("hand collision - mouse coords: %d, y: %d\n", x, y);
 	//printf("5. %dth element: x=%d, y=%d\n", 10, hour_hand[10]->x, hour_hand[10]->y);
 	
 	//TODO: change so it checks collision for both hands
-	for (i=0, c = hour->xy[i]; i<RADIUS && c != NULL; i++)
+	//for (i=0, c = hour->xy[i]; i<RADIUS && c != NULL; i++)
+	for (i=0; i<RADIUS && h->xy[i] != NULL; i++)
 	{
-		//TODO: Need to modify this collision so more precise
-		//printf("hx: %d, x: %d\n", c->x, x);
-		//printf("hy: %d, y: %d\n", c->y, y);
+		//TODO: Need to modify this collision so more precise		
+		//printf("hand collision - hand coords, i: %d, x: %d, y: %d\n", i, hour->xy[i]->x, hour->xy[i]->y);
 		//if (c->x == x || c->y == y)
-		if ((c->x >= x-3 || c->x <= x+3) &&
-			(c->y >= y-3 || c->y <= y+3))
+		//TODO: can this logic be centralised somehow in hand struct?
+		if ((h->xy[i]->x >= x-3 && h->xy[i]->x <= x+3) &&
+			(h->xy[i]->y >= y-3 && h->xy[i]->y <= y+3))
 		{
 			printf("hand collision!\n");
 			//hour_hand_moving = 1;
-			hour->is_moving = 1;
+			h->is_moving = 1;
 			r = 1;
 			break;
 		}
@@ -386,7 +375,11 @@ int hand_collision(int x, int y)
 
 void handle_mouse_down(int x, int y)
 {
-	hand_collision(x, y);
+	int is_collision;
+	is_collision = hand_collision(x, y, hour);
+	
+	if (is_collision == 0)
+		is_collision = hand_collision(x, y, minute);
 }
 
 //Returns polar coordinate angle (-iPI to +PI) from cartesian coordinates (i.e. x, y)
@@ -452,36 +445,43 @@ int convert_angle_to_clock_minute(float angle)
 		
 }
 
-
+void move_hand(SDL_Surface *screen, int x, int y, int scr_wid, int scr_hi, hand *h)
+{
+	float angle = get_angle_from_coords(x, y, scr_wid, scr_hi);
+	//printf("1. mouse up after hand move attempt. Angle: %f, \n", angle);
+	int minute = convert_angle_to_clock_minute(angle);
+	//printf("20. mouse up after hand move attempt. Angle: %f, Minute: %d\n", angle, minute);		
+	
+	//draw_hand(screen, r, x, y, 30, hour_hand);
+	
+	//draw_face(screen, scr_wid, scr_hi);
+	
+	int r = 150;
+	int hx = scr_wid/2;
+	int hy = scr_hi - r - 20;
+	
+	//printf("1. %dth element: x=%d, y=%d\n", 10, hour_hand[10]->x, hour_hand[10]->y);
+	draw_hand(screen, r, hx, hy, h, 0, 0, 0);
+	
+	h->is_moving = 0;
+	h->minute = minute;
+	
+	//printf("2. %dth element: x=%d, y=%d\n", 10, hour_hand[10]->x, hour_hand[10]->y);
+	draw_hand(screen, r, hx, hy, h, 0, 255, 0);
+	//printf("3. %dth element: x=%d, y=%d\n", 10, hour_hand[10]->x, hour_hand[10]->y);
+}
 
 void handle_mouse_up(SDL_Surface *screen, int x, int y, int scr_wid, int scr_hi)
-{
-	//TODO: change so it checks collision for both hands
-	
+{	
 	if (hour->is_moving == 1)
 	{
-		float angle = get_angle_from_coords(x, y, scr_wid, scr_hi);
-		//printf("1. mouse up after hand move attempt. Angle: %f, \n", angle);
-		int minute = convert_angle_to_clock_minute(angle);
-		//printf("20. mouse up after hand move attempt. Angle: %f, Minute: %d\n", angle, minute);		
-		
-		//draw_hand(screen, r, x, y, 30, hour_hand);
-		
-		//draw_face(screen, scr_wid, scr_hi);
-		
-		int r = 150;
-		int x = scr_wid/2;
-		int y = scr_hi - r - 20;
-		
-		//printf("1. %dth element: x=%d, y=%d\n", 10, hour_hand[10]->x, hour_hand[10]->y);
-		draw_hand(screen, r, x, y, hour, 0, 0, 0);
-		
-		hour->is_moving = 0;
-		hour->minute = minute;
-		
-		//printf("2. %dth element: x=%d, y=%d\n", 10, hour_hand[10]->x, hour_hand[10]->y);
-		draw_hand(screen, r, x, y,hour, 0, 255, 0);
-		//printf("3. %dth element: x=%d, y=%d\n", 10, hour_hand[10]->x, hour_hand[10]->y);
+		//Move hour hand
+		move_hand(screen, x, y, scr_wid, scr_hi, hour);
+	}
+	else if (minute->is_moving == 1)
+	{
+		//Move minute hand
+		move_hand(screen, x, y, scr_wid, scr_hi, minute);
 	}
 }
 
