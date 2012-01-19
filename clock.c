@@ -1,7 +1,8 @@
 #include <SDL/SDL.h>
-# include <stdlib.h>
+#include <stdlib.h>
 #include <SDL/SDL_ttf.h>
 #include "clockface.h"
+# include <math.h>
 
 int Running;
 SDL_Surface *screen;
@@ -190,11 +191,39 @@ int getHour()
 
 int getMinute()
 {
-	int x, m;
+	int x, m, r;
 	char s;
 	x = rand(); // everytime it is different because the seed is different.
 	m = x % 59;
-	return m;
+	
+	//Calculate remainder and round to nearest 5
+	//r = m % 10;
+	
+	//printf("random: %d, min: %d, test: %d, test2: %d, test3: %d\n", x, m, m % 10, m % 1, m/10);	
+	return round5(m);
+}
+
+int round5(int m)
+{
+	int x, y;
+	x = m % 10; //remainder
+	y = m / 10; //10th
+	
+	if (x >= 8)
+	{
+		//Round up to nearest 10 (e.g. 38, 39 will round to 40)
+		y++;
+		x = 0;
+	}
+	else if (x <= 7 && x >= 3)
+	{
+		//Round to nearest 5 (e.g. 33, 34, 35, 36, 37 will round to 35)
+		x = 5;
+	}
+	else
+		x = 0; //Round down to nearest 10 (e.g. 30, 31, 32 will round to 30)
+	
+	return (y*10)+x; //TODO: round to 5
 }
 
 int hourMinToStr(int h, int m, char* s)
