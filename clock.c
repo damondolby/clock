@@ -8,7 +8,7 @@ int Running;
 SDL_Surface *screen;
 TTF_Font* font;
 int NewTime;
-char TimeToDisplay[6];
+char TimeToDisplay[5];
 int scr_wid = 640;
 int scr_hi = 480;
 int mouse_x;
@@ -50,7 +50,7 @@ int init() {
 	font = TTF_OpenFont("FreeSans.ttf", 26);
 	
 	Running = 1;
-	NewTime = 0;
+	NewTime = 1;
 	
 	draw_clock_face(screen, scr_wid, scr_hi);
 	
@@ -90,8 +90,9 @@ int events(SDL_Event *event) {
 					//{
 					//	printf("yes!\n");
 					//}
+					printf("1. mouse down\n");
 					handle_mouse_down(mouse_x, mouse_y);
-					
+					printf("2. mouse down\n");
 					break;
 				
 				case SDL_BUTTON_RIGHT: 
@@ -114,7 +115,6 @@ int events(SDL_Event *event) {
 					mouse_y = event->motion.y;
 				
 					handle_mouse_up(screen, mouse_x, mouse_y, scr_wid, scr_hi);
-					
 					break;			
 			}
 			break;
@@ -147,6 +147,10 @@ int loop() {
 				
 		NewTime = 0;
 		
+		//todo: time_t is a restricted type, and 
+		//may not be meaningfully converted to unsigned int 
+		//on some systems?
+		srand ( (unsigned int)time ( NULL ) ); 
 		h = getHour();
 		m = getMinute();
 		len = hourMinToStr(h, m, TimeToDisplay);
@@ -156,16 +160,57 @@ int loop() {
 	
 }
 
+void draw_rectangle()
+{
+	SDL_Rect rect;
+	rect.x = 0;
+	rect.y = 50;
+	rect.w = scr_wid;
+	rect.h = 50;
+	Uint32 color = SDL_MapRGB(screen->format, 0xFF, 0x00, 0x00);
+	SDL_FillRect(screen, &rect, color);
+}
+
+void draw_background()
+{
+	SDL_Rect rect;
+	rect.x = 10;
+	rect.y = 10;
+	rect.w = 20;
+	rect.h = 20;
+	Uint32 color = SDL_MapRGB(screen->format, 0xFF, 0x00, 0x00);
+	SDL_FillRect(screen, &screen->clip_rect, color);
+	//DL_BlitSurface(textSurface, NULL, screen, &textLocation);
+	//SDL_Flip(screen);
+}
+
 int render() {
 	//SDL_Surface* textSurface = TTF_RenderText_Shaded(font, "Press return...", foregroundColor, backgroundColor);
-
+	draw_rectangle();
 	// Pass zero for width and height to draw the whole surface 
 	SDL_Rect textLocation = { scr_wid/2-20, 50, 0, 0 };
 	
+	/*SDL_Rect rect;
+	rect.x = 10;
+	rect.y = 10;
+	rect.w = 20;
+	rect.h = 20;
+	Uint32 color = SDL_MapRGB(screen->format, 0xFF, 0x00, 0x00);*/
+	//SDL_FillRect(screen, &screen->clip_rect, color);
+	
+	
 	SDL_Color foregroundColor = { 255, 255, 255 }; 
 	SDL_Color backgroundColor = { 0, 0, 255 };		
+	
+	//clear the screen
+	//SDL_FillRect(screen, &textLocation, 0);
+	//SDL_Flip(screen);
 
-	SDL_Surface* textSurface = TTF_RenderText_Shaded(font, TimeToDisplay, foregroundColor, backgroundColor);
+	//SDL_Surface* textSurface = TTF_RenderText_Shaded(font, TimeToDisplay, foregroundColor, backgroundColor);
+	SDL_Surface* textSurface = TTF_RenderText_Blended(font, TimeToDisplay, foregroundColor);
+	
+	//draw_background();
+	//draw_rectangle();
 	
 	//SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0,0));
 	SDL_BlitSurface(textSurface, NULL, screen, &textLocation);
@@ -192,8 +237,12 @@ int getHour()
 int getMinute()
 {
 	int x, m, r;
-	char s;
+	char s;	
 	x = rand(); // everytime it is different because the seed is different.
+	//x = get_random();
+	//x = srand ( (unsigned int)time ( NULL ) );
+	//x = srand(100);
+	printf("x=%d\n", x);
 	m = x % 59;
 	
 	//Calculate remainder and round to nearest 5
@@ -202,6 +251,33 @@ int getMinute()
 	//printf("random: %d, min: %d, test: %d, test2: %d, test3: %d\n", x, m, m % 10, m % 1, m/10);	
 	return round5(m);
 }
+
+/*int get_random()
+{
+	http://eternallyconfuzzled.com/arts/jsw_art_rand.aspx
+	int r, low, high;
+	r = -1;
+	low = 0;
+	high = 59;
+ 
+	while ( r < low || high < r )
+	{
+	  r = rand();
+	}
+}*/
+
+ /*unsigned time_seed()
+ {
+ time_t now = time ( 0 );
+ unsigned char *p = (unsigned char *)&now;
+ unsigned seed = 0;
+ size_t i;
+ 
+ for ( i = 0; i < sizeof now; i++ )
+ seed = seed * ( UCHAR_MAX + 2U ) + p[i];
+
+return seed;
+}*/
 
 int round5(int m)
 {
@@ -251,7 +327,12 @@ int hourMinToStr(int h, int m, char* s)
 		s[i++] = (m/10) % 10 + '0';
 	}
 	s[i++] = m%10 + '0';
-	s[i] = '\0';
+	
+	//s[i] = '\0';
+	if (i == 4)
+		s[4] = 0;
+		//s[4] = '\0';
+	printf("0=%d, 1=%d, 2=%d, 3=%d, 4=%d, 5=%d, i=%d, time: %s\n", s[0] - '0', s[1] - '0', s[2] - '0', s[3] - '0', s[4] - '0', s[5] - '0', i, s);
 	return i;
 }
 

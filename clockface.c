@@ -349,6 +349,7 @@ int hand_collision(int x, int y, hand* h)
 	
 	r = 0;
 	
+	printf("5. mouse down\n");
 	//printf("hand collision - mouse coords: %d, y: %d\n", x, y);
 	//printf("5. %dth element: x=%d, y=%d\n", 10, hour_hand[10]->x, hour_hand[10]->y);
 	
@@ -356,6 +357,7 @@ int hand_collision(int x, int y, hand* h)
 	//for (i=0, c = hour->xy[i]; i<RADIUS && c != NULL; i++)
 	for (i=0; i<RADIUS && h->xy[i] != NULL; i++)
 	{
+		printf("6. mouse down\n");
 		//TODO: Need to modify this collision so more precise		
 		//printf("hand collision - hand coords, i: %d, x: %d, y: %d\n", i, hour->xy[i]->x, hour->xy[i]->y);
 		//if (c->x == x || c->y == y)
@@ -370,16 +372,19 @@ int hand_collision(int x, int y, hand* h)
 			break;
 		}
 	} 
+	printf("7. mouse down\n");
 	return r;
 }
 
 void handle_mouse_down(int x, int y)
 {
 	int is_collision;
+	printf("3. mouse down\n");
 	is_collision = hand_collision(x, y, hour);
-	
+	printf("4. mouse down\n");
 	if (is_collision == 0)
 		is_collision = hand_collision(x, y, minute);
+	printf("5. mouse down\n");
 }
 
 //Returns polar coordinate angle (-iPI to +PI) from cartesian coordinates (i.e. x, y)
