@@ -52,7 +52,7 @@ int init() {
 	Running = 1;
 	NewTime = 1;
 	
-	draw_clock_face(screen, scr_wid, scr_hi);
+	init_clock_face(screen, scr_wid, scr_hi);
 	
 	//writeText2("hey", 10, 10);
 	//writeText2("hey2222", 100, 100);
@@ -90,9 +90,9 @@ int events(SDL_Event *event) {
 					//{
 					//	printf("yes!\n");
 					//}
-					printf("1. mouse down\n");
+					//printf("1. mouse down\n");
 					handle_mouse_down(mouse_x, mouse_y);
-					printf("2. mouse down\n");
+					//printf("2. mouse down\n");
 					break;
 				
 				case SDL_BUTTON_RIGHT: 
@@ -114,7 +114,7 @@ int events(SDL_Event *event) {
 					mouse_x = event->motion.x;
 					mouse_y = event->motion.y;
 				
-					handle_mouse_up(screen, mouse_x, mouse_y, scr_wid, scr_hi);
+					handle_mouse_up(mouse_x, mouse_y);
 					break;			
 			}
 			break;
@@ -171,7 +171,7 @@ void draw_rectangle()
 	SDL_FillRect(screen, &rect, color);
 }
 
-void draw_background()
+/*void draw_background()
 {
 	SDL_Rect rect;
 	rect.x = 10;
@@ -182,7 +182,7 @@ void draw_background()
 	SDL_FillRect(screen, &screen->clip_rect, color);
 	//DL_BlitSurface(textSurface, NULL, screen, &textLocation);
 	//SDL_Flip(screen);
-}
+}*/
 
 int render() {
 	//SDL_Surface* textSurface = TTF_RenderText_Shaded(font, "Press return...", foregroundColor, backgroundColor);

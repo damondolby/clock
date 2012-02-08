@@ -6,33 +6,25 @@
 # include <unistd.h>
 # include <math.h>
 #include <SDL/SDL_ttf.h>
+#include "clockface.h"
 
-#define RADIUS 150
 
 /*http://tille.garrels.be/training/sdl/circle.php*/
 
-typedef struct {
-	int x;
-	int y;
-} coords;
-
-typedef struct {
-	coords *xy[RADIUS];
-	int minute;
-	int is_moving;	
-} hand;
 
 
 //coords *hour_hand[RADIUS];
-coords *min_hand[RADIUS];
+//coords *min_hand[RADIUS];
 
-hand *hour;
-hand *minute;
+//hand *hour;
+//hand *minute;
+
+clock *clockface;
 
 //int hour_hand_moving = 0; //TODO: change so part of new 'hand struct'
                                                                                 
 /* Begin draw_pixel. */
-void draw_pixel(SDL_Surface *screen, int x, int y, Uint8 R, Uint8 G, Uint8 B)
+void draw_pixel(int x, int y, Uint32 color)
 {
 	
 	//printf("x=%i, y=%i\n", x, y);
@@ -43,19 +35,19 @@ void draw_pixel(SDL_Surface *screen, int x, int y, Uint8 R, Uint8 G, Uint8 B)
 if ((x>=640) || (x<0)) return;
 if ((y>=480) || (y<0)) return;
 
-    Uint32 color = SDL_MapRGB(screen->format, R, G, B);
+    //Uint32 color = SDL_MapRGB(clockface->screen->format, R, G, B);
 
-    if ( SDL_MUSTLOCK(screen) ) {
-        if ( SDL_LockSurface(screen) < 0 ) {
+    if ( SDL_MUSTLOCK(clockface->screen) ) {
+        if ( SDL_LockSurface(clockface->screen) < 0 ) {
             return;
         }
     }
     
-    switch (screen->format->BytesPerPixel) {
+    switch (clockface->screen->format->BytesPerPixel) {
         case 1: { /* Assuming 8-bpp */
             Uint8 *bufp;
 
-            bufp = (Uint8 *)screen->pixels + y*screen->pitch + x;
+            bufp = (Uint8 *)clockface->screen->pixels + y*clockface->screen->pitch + x;
             *bufp = color;
         }
         break;
@@ -63,7 +55,7 @@ if ((y>=480) || (y<0)) return;
         case 2: { /* Probably 15-bpp or 16-bpp */
             Uint16 *bufp;
 
-            bufp = (Uint16 *)screen->pixels + y*screen->pitch/2 + x;
+            bufp = (Uint16 *)clockface->screen->pixels + y*clockface->screen->pitch/2 + x;
             *bufp = color;
         }
         break;
@@ -71,7 +63,7 @@ if ((y>=480) || (y<0)) return;
         case 3: { /* Slow 24-bpp mode, usually not used */
             Uint8 *bufp;
 
-            bufp = (Uint8 *)screen->pixels + y*screen->pitch + x * 3;
+            bufp = (Uint8 *)clockface->screen->pixels + y*clockface->screen->pitch + x * 3;
             if(SDL_BYTEORDER == SDL_LIL_ENDIAN) {
                 bufp[0] = color;
                 bufp[1] = color >> 8;
@@ -87,20 +79,20 @@ if ((y>=480) || (y<0)) return;
         case 4: { /* Probably 32-bpp */
             Uint32 *bufp;
                                                                                 
-            bufp = (Uint32 *)screen->pixels + y*screen->pitch/4 + x;
+            bufp = (Uint32 *)clockface->screen->pixels + y*clockface->screen->pitch/4 + x;
             *bufp = color;
         }
         break;
     }
-    if ( SDL_MUSTLOCK(screen) ) {
-        SDL_UnlockSurface(screen);
+    if ( SDL_MUSTLOCK(clockface->screen) ) {
+        SDL_UnlockSurface(clockface->screen);
     }
-    SDL_UpdateRect(screen, x, y, 1, 1);
+    SDL_UpdateRect(clockface->screen, x, y, 1, 1);
 }
 /* End draw_pixel. */
 
 
-void WriteClockText(char* txt, TTF_Font* font, SDL_Surface *screen, int x, int y)
+void write_clock_text(char* txt, TTF_Font* font, int x, int y)
 {	
 	SDL_Rect textLocation = { x, y, 0, 0 };
 	
@@ -114,9 +106,9 @@ void WriteClockText(char* txt, TTF_Font* font, SDL_Surface *screen, int x, int y
 	//SDL_Surface* textSurface2 = TTF_RenderText_Shaded(font, "text", foregroundColor, backgroundColor);
 
 	//SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 100, 0, 0));
-	SDL_BlitSurface(textSurface, NULL, screen, &textLocation);
+	SDL_BlitSurface(textSurface, NULL, clockface->screen, &textLocation);
 	//SDL_BlitSurface(textSurface2, NULL, screen, &textLocation2);
-	SDL_Flip(screen);
+	SDL_Flip(clockface->screen);
 	
 	SDL_FreeSurface(textSurface);
 	//SDL_FreeSurface(textSurface2);
@@ -140,16 +132,16 @@ void WriteClockText(char* txt, TTF_Font* font, SDL_Surface *screen, int x, int y
 	
 	//printf("%f\n", clock_middle_y - (clock_r-20)*sin(M_PI/2.0));
 	//printf("%f\n", clock_middle_y - (clock_r-20)*sin((3/2.0)*M_PI));
-	WriteClockText("12", font, screen, 
+	write_clock_text("12", font, screen, 
 					x, 
 					y - (r)*sin(M_PI/2.0));
-	WriteClockText("3", font, screen, 
+	write_clock_text("3", font, screen, 
 					x + (r)*cos(0*M_PI), 
 					y);
-	WriteClockText("6", font, screen, 
+	write_clock_text("6", font, screen, 
 					x, 
 					y - (r)*sin((3/2.0)*M_PI));
-	WriteClockText("9", font, screen, 
+	write_clock_text("9", font, screen, 
 					x + (r)*cos(M_PI), 
 					y);
 					
@@ -185,16 +177,16 @@ void WriteClockText(char* txt, TTF_Font* font, SDL_Surface *screen, int x, int y
     return str;
 }*/
 
-void add_numbers(SDL_Surface *screen, int r, int x, int y)
+void add_numbers()
 {
-	int i;	
+	int i, r;	
 	char s[3];
 	TTF_Font* font = TTF_OpenFont("FreeSans.ttf", 18);
 	
 	//apply adjustments so fonts look nice on the clock face
-	x = x - 10;
-	y = y - 10;
-	r = r - 20;
+	int x = clockface->centre->x - 10;
+	int y = clockface->centre->y - 10;
+	r = RADIUS - 20;
 	
 	for (i=1; i<=12; i++)
 	{
@@ -216,7 +208,7 @@ void add_numbers(SDL_Surface *screen, int r, int x, int y)
 		int yc = y + r*sin(pi_factor);
 		//draw_pixel(screen, xc, yc, 0, 255, 0 );}
 		
-		WriteClockText(s, font, screen, 
+		write_clock_text(s, font, 
 						xc, 
 						yc);
 	}
@@ -236,13 +228,23 @@ coords * point_new(int x, int y)
 
 //TODO: change x and y to rx and ry to indicate centre of the circle
 //void draw_hand(SDL_Surface *screen, int r, int x, int y, int hand_minute, coords** cs, Uint8 R, Uint8 G, Uint8 B)
-void draw_hand(SDL_Surface *screen, int r, int x, int y, hand* h, Uint8 R, Uint8 G, Uint8 B)
+void add_hand(hand* h)
+{
+	draw_hand(h, h->color);
+}
+
+void remove_hand(hand* h)
+{
+	draw_hand(h,  SDL_MapRGB(clockface->screen->format, 0, 0, 0));
+}
+
+void draw_hand(hand* h, Uint32 color)
 {
 	int i;
 	float pi_factor;
 	int hand_minute;
 	
-	r = r - 50;
+	//r = r - 50;
 	
 	//TODO: this is very hacky. Need to find a better way to convert cartesian coordinates (x and y) to polar coordinates  (radius and angle) of cicle from clock minute
 	hand_minute = h->minute - 15;
@@ -251,36 +253,36 @@ void draw_hand(SDL_Surface *screen, int r, int x, int y, hand* h, Uint8 R, Uint8
 	//printf("Sum: %f\n", (hand_minute * 6) / 180.0);
 	printf("hand: %i, pi_factor: %f\n", hand_minute, pi_factor);
 	
-	for (i=0; i<r; i++)
+	for (i=0; i<h->radius; i++)
 	{		
-		int xc = x + i*cos(pi_factor);
-		int yc = y + i*sin(pi_factor);
+		int xc = clockface->centre->x + i*cos(pi_factor);
+		int yc = clockface->centre->y + i*sin(pi_factor);
 		//printf("%dth element - xc: %d, xy: %d\n", i, xc, yc);
 		//coords *coord  = {xc, yc};
 		coords *coord  = point_new(xc, yc);
-		//hour_hand[i] = &coord;
+		//hour_hand[i] = &coord;                                                                                      
 		h->xy[i] = coord;
-		draw_pixel(screen, xc, yc, R, G, B);
+		draw_pixel(xc, yc, color);
 	}
 }
 
-void draw_face(SDL_Surface *screen, int scr_wid, int scr_hi)
+void draw_face()
 {
-	int r = 150;
-	int x = scr_wid/2;
-	int y = scr_hi - r - 20;
+	//int r = 150;
+	//int x = scr_wid/2;
+	//int y = scr_hi - RADIUS - 20;
 	
 	/* draw a circle.  The constant M_PI is defined from math.h. */
 	float i;
 											
 	for (i=0; i<2*M_PI; i+=0.01) {
-		int xc = x + r*cos(i);
-		int yc = y + r*sin(i);
-		draw_pixel(screen, xc, yc, 0, 255, 0 );
+		int xc = clockface->centre->x + RADIUS*cos(i);
+		int yc = clockface->centre->y + RADIUS*sin(i);
+		draw_pixel(xc, yc, clockface->color);
 	  }
 }
                                                                          
-void draw_clock_face(SDL_Surface *screen, int scr_wid, int scr_hi)
+void init_clock_face(SDL_Surface *screen, int scr_wid, int scr_hi)
 {	    
 	printf ("bytesperpixel: %i\n", screen->format->BytesPerPixel);
 	//printf("circle test");
@@ -289,54 +291,56 @@ void draw_clock_face(SDL_Surface *screen, int scr_wid, int scr_hi)
 	//From radius and screen width/height set centre of the circle rx and ry
 	//TODO: pass these into funciton once refactored? (These are defined in two functions)
 	//TODO: change to rx and ry (i.e. to indicate centre of the circle)
-	int r = 150;
-	int x = scr_wid/2;
-	int y = scr_hi - r - 20;
+	//int r = 150;
+	//int origin_x = scr_wid/2;
+	//int origin_y = scr_hi - RADIUS - 20;	
 	
+	//printf("1. draw clock face\n");
+	if((clockface = malloc(sizeof *clockface)) != NULL)
+	  {	  
+		 if((clockface->centre = malloc(sizeof *clockface->centre)) != NULL)
+		{
+			//From radius and screen width/height set centre of the circle rx and ry
+			clockface->centre->x = scr_wid/2;
+			clockface->centre->y = scr_hi - RADIUS - 20;		
+			clockface->screen = screen;
+			clockface->color = SDL_MapRGB(clockface->screen->format, 255, 0, 0);
+		}		
+	  }
 	
-    //TTF_Font* font = TTF_OpenFont("FreeSans.ttf", 26);	
-	
-	//x + (r-20)*cos(90),
-	//float test = sin(M_PI/2.0);
-	//float test2 = 3/2.0;
-	//printf("%f\n", test);
-	//printf("%f\n", test2);
-	//printf("%f\n", sin((3/2.0)*M_PI));
-	
-  
-	/* draw a circle.  The constant M_PI is defined from math.h. */
-	/*float i;
-											
-	for (i=0; i<2*M_PI; i+=0.01) {
-		int xc = x + r*cos(i);
-		int yc = y + r*sin(i);
-		draw_pixel(screen, xc, yc, 0, 255, 0 );
-	  }*/
-	  
-	  draw_face(screen, scr_wid, scr_hi);
+	//printf("2. draw clock face\n");	  
+	  //TODO: can clockface be passed around here now?
+	draw_face();
 	  
 	/* end draw circle. */
 	  
 	 //add_hours(screen, r, x, y);	  
 	  
-	  if((hour = malloc(sizeof *hour)) != NULL)
+	  printf("2. draw clock face - add hour\n");
+	  //if((hour = malloc(sizeof *hour)) != NULL)
+	  if((clockface->hour = malloc(sizeof *clockface->hour)) != NULL)
 	  {	  
-		  hour->minute = 50;
-		  draw_hand(screen, r, x, y, hour, 0, 255, 0);
+		  clockface->hour->minute = 50;
+		  clockface->hour->radius = RADIUS-50;
+		  clockface->hour->color = SDL_MapRGB(clockface->screen->format, 0, 0, 255);
+		  add_hand(clockface->hour);
 	  }
 	  
-	   if((minute = malloc(sizeof *minute)) != NULL)
+	  printf("3. draw clock face - add minute\n");
+	   if((clockface->minute = malloc(sizeof *clockface->minute)) != NULL)
 	  {	  
-		  minute->minute = 15;
-		  draw_hand(screen, r, x, y, minute, 0, 255, 0);
+		  clockface->minute->minute = 15;
+		  clockface->minute->radius = RADIUS-75;
+		  clockface->minute->color = SDL_MapRGB(clockface->screen->format, 0, 255, 0);
+		  add_hand(clockface->minute);
 	  }
 	  
-	  int i2 = 29;
+	  //int i2 = 29;
 	  //printf("%dth element - xc: %d, xy: %d\n", i2, hour_hand[i2]->x, hour_hand[i2]->y);
-	  i2 = 89;
+	  //i2 = 89;
 	  //printf("%dth element - xc: %d, xy: %d\n", i2, hour_hand[i2]->x, hour_hand[i2]->y);
 	  
-	  add_numbers(screen, r, x, y);
+	  add_numbers();
 }
 
 /*If the co-ordinates are 'close' to either clock hands then return to true
@@ -349,7 +353,7 @@ int hand_collision(int x, int y, hand* h)
 	
 	r = 0;
 	
-	printf("5. mouse down\n");
+	printf("1. hand_collision\n");
 	//printf("hand collision - mouse coords: %d, y: %d\n", x, y);
 	//printf("5. %dth element: x=%d, y=%d\n", 10, hour_hand[10]->x, hour_hand[10]->y);
 	
@@ -357,7 +361,7 @@ int hand_collision(int x, int y, hand* h)
 	//for (i=0, c = hour->xy[i]; i<RADIUS && c != NULL; i++)
 	for (i=0; i<RADIUS && h->xy[i] != NULL; i++)
 	{
-		printf("6. mouse down\n");
+		printf("2. hand_collision\n");
 		//TODO: Need to modify this collision so more precise		
 		//printf("hand collision - hand coords, i: %d, x: %d, y: %d\n", i, hour->xy[i]->x, hour->xy[i]->y);
 		//if (c->x == x || c->y == y)
@@ -365,14 +369,14 @@ int hand_collision(int x, int y, hand* h)
 		if ((h->xy[i]->x >= x-3 && h->xy[i]->x <= x+3) &&
 			(h->xy[i]->y >= y-3 && h->xy[i]->y <= y+3))
 		{
-			printf("hand collision!\n");
+			printf("3. hand_collision\n");
 			//hour_hand_moving = 1;
 			h->is_moving = 1;
 			r = 1;
 			break;
 		}
 	} 
-	printf("7. mouse down\n");
+	printf("4. hand_collision\n");
 	return r;
 }
 
@@ -380,28 +384,29 @@ void handle_mouse_down(int x, int y)
 {
 	int is_collision;
 	printf("3. mouse down\n");
-	is_collision = hand_collision(x, y, hour);
+	is_collision = hand_collision(x, y, clockface->hour);
 	printf("4. mouse down\n");
 	if (is_collision == 0)
-		is_collision = hand_collision(x, y, minute);
+		is_collision = hand_collision(x, y, clockface->minute);
 	printf("5. mouse down\n");
 }
 
 //Returns polar coordinate angle (-iPI to +PI) from cartesian coordinates (i.e. x, y)
-float get_angle_from_coords(int x, int y, int scr_wid, int scr_hi)
+float get_angle_from_coords(int x, int y)
 {
 	float angle;
 	
 	//From radius and screen width/height set centre of the circle rx and ry
 	//TODO: pass these into funciton once refactored? (These are defined in two functions)
-	int r = 150;
-	int rx = scr_wid/2;
-	int ry = scr_hi - r - 20;
+	//int r = 150;
+	//int rx = scr_wid/2;
+	//int ry = scr_hi - RADIUS - 20;
 	
-	printf("Getting Angle. x=%d, y=%d, rx=%d, ry=%d\n", x, y, rx, ry);
+	printf("Getting Angle. x=%d, y=%d, rx=%d, ry=%d\n", clockface->centre->x, clockface->centre->y, x, y);
 			
 	//angle = (atan2(ry-y, x-rx) / M_PI) * 180;	
-	angle = atan2(ry-y, x-rx);
+	angle = atan2(clockface->centre->y-y, x-clockface->centre->x);
+	//angle = atan2(clockface->centre->y-y, clockface->centre->x-x);
 	
 	return angle;
 }
@@ -450,9 +455,9 @@ int convert_angle_to_clock_minute(float angle)
 		
 }
 
-void move_hand(SDL_Surface *screen, int x, int y, int scr_wid, int scr_hi, hand *h)
+void move_hand(int x, int y, hand *h)
 {
-	float angle = get_angle_from_coords(x, y, scr_wid, scr_hi);
+	float angle = get_angle_from_coords(x, y);
 	//printf("1. mouse up after hand move attempt. Angle: %f, \n", angle);
 	int minute = convert_angle_to_clock_minute(angle);
 	//printf("20. mouse up after hand move attempt. Angle: %f, Minute: %d\n", angle, minute);		
@@ -461,32 +466,38 @@ void move_hand(SDL_Surface *screen, int x, int y, int scr_wid, int scr_hi, hand 
 	
 	//draw_face(screen, scr_wid, scr_hi);
 	
-	int r = 150;
-	int hx = scr_wid/2;
-	int hy = scr_hi - r - 20;
+	//printf("1. move_hand. angle: %f, minute: %d\n", angle, minute);
+	
+	//int r = 150;
+	//int hx = scr_wid/2;
+	//int hy = scr_hi - RADIUS - 20;
 	
 	//printf("1. %dth element: x=%d, y=%d\n", 10, hour_hand[10]->x, hour_hand[10]->y);
-	draw_hand(screen, r, hx, hy, h, 0, 0, 0);
+	//draw_hand(h, 0, 0, 0);
+	//TODO: better way to remove hands?
+	remove_hand(h);
 	
 	h->is_moving = 0;
 	h->minute = minute;
 	
 	//printf("2. %dth element: x=%d, y=%d\n", 10, hour_hand[10]->x, hour_hand[10]->y);
-	draw_hand(screen, r, hx, hy, h, 0, 255, 0);
+	add_hand(h);
 	//printf("3. %dth element: x=%d, y=%d\n", 10, hour_hand[10]->x, hour_hand[10]->y);
 }
 
-void handle_mouse_up(SDL_Surface *screen, int x, int y, int scr_wid, int scr_hi)
+void handle_mouse_up(int x, int y)
 {	
-	if (hour->is_moving == 1)
+	if (clockface->hour->is_moving == 1)
 	{
+		//printf("1. handle_mouse_up - hour. x=%d, y=%d\n", x, y);
 		//Move hour hand
-		move_hand(screen, x, y, scr_wid, scr_hi, hour);
+		move_hand(x, y, clockface->hour);
 	}
-	else if (minute->is_moving == 1)
+	else if (clockface->minute->is_moving == 1)
 	{
+		//printf("2. handle_mouse_up - hour\n");
 		//Move minute hand
-		move_hand(screen, x, y, scr_wid, scr_hi, minute);
+		move_hand(x, y, clockface->minute);
 	}
 }
 
