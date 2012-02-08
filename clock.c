@@ -2,17 +2,8 @@
 #include <stdlib.h>
 #include <SDL/SDL_ttf.h>
 #include "clockface.h"
+#include "clock.h"
 # include <math.h>
-
-int Running;
-SDL_Surface *screen;
-TTF_Font* font;
-int NewTime;
-char TimeToDisplay[5];
-int scr_wid = 640;
-int scr_hi = 480;
-int mouse_x;
-int mouse_y;
 
 //void writeText2(char* txt, int x, int y);
 
@@ -37,13 +28,13 @@ int init() {
 	}
 	atexit(SDL_Quit);
 										
-	screen = SDL_SetVideoMode(scr_wid, scr_hi, 16, SDL_SWSURFACE);
+	screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 16, SDL_SWSURFACE);
 	if ( screen == NULL ) {
-		fprintf(stderr, "Unable to set %ix%i video: %s\n", scr_wid, scr_hi, SDL_GetError());
+		fprintf(stderr, "Unable to set %ix%i video: %s\n", SCREEN_WIDTH, SCREEN_HEIGHT, SDL_GetError());
 		exit(1);
 	}	
 										
-	printf("Set window of %ix%i at %d bits per pixel mode\n", scr_wid, scr_hi,
+	printf("Set window of %ix%i at %d bits per pixel mode\n", SCREEN_WIDTH, SCREEN_HEIGHT,
 	screen->format->BitsPerPixel);
 	TTF_Init();      
 	
@@ -52,7 +43,7 @@ int init() {
 	Running = 1;
 	NewTime = 1;
 	
-	init_clock_face(screen, scr_wid, scr_hi);
+	init_clock_face(screen, SCREEN_WIDTH, SCREEN_HEIGHT);
 	
 	//writeText2("hey", 10, 10);
 	//writeText2("hey2222", 100, 100);
@@ -165,7 +156,7 @@ void draw_rectangle()
 	SDL_Rect rect;
 	rect.x = 0;
 	rect.y = 50;
-	rect.w = scr_wid;
+	rect.w = SCREEN_WIDTH;
 	rect.h = 50;
 	Uint32 color = SDL_MapRGB(screen->format, 0xFF, 0x00, 0x00);
 	SDL_FillRect(screen, &rect, color);
@@ -188,7 +179,7 @@ int render() {
 	//SDL_Surface* textSurface = TTF_RenderText_Shaded(font, "Press return...", foregroundColor, backgroundColor);
 	draw_rectangle();
 	// Pass zero for width and height to draw the whole surface 
-	SDL_Rect textLocation = { scr_wid/2-20, 50, 0, 0 };
+	SDL_Rect textLocation = { SCREEN_WIDTH/2-20, 50, 0, 0 };
 	
 	/*SDL_Rect rect;
 	rect.x = 10;
