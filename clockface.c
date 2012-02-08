@@ -19,7 +19,7 @@
 //hand *hour;
 //hand *minute;
 
-clock *clockface;
+
 
 //int hour_hand_moving = 0; //TODO: change so part of new 'hand struct'
                                                                                 

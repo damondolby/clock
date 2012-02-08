@@ -28,6 +28,7 @@ typedef struct {
 	Uint32 color;
 } clock;
 
+clock *clockface;
 
 void draw_pixel(int x, int y, Uint32 color);
 
