@@ -116,15 +116,24 @@ int events(SDL_Event *event) {
 int run() {
 	
 	SDL_Event event;
+	//int workDone = 0;
 	
 	while (Running) {
 		
+		//printf("running...\n");
 		while (SDL_PollEvent(&event))
 		{
+			//workDone = 1;
+			//printf("polling...\n");
 			events(&event);	
 			loop();
 			render();
 		}
+		//if (workDone == 0)
+		SDL_Delay(100);
+		//SDL_WaitEvent();
+			//sleep(1);
+		//workDone = 0;
 	}
 }
 

@@ -359,9 +359,9 @@ int hand_collision(int x, int y, hand* h)
 	
 	//TODO: change so it checks collision for both hands
 	//for (i=0, c = hour->xy[i]; i<RADIUS && c != NULL; i++)
-	for (i=0; i<RADIUS && h->xy[i] != NULL; i++)
+	for (i=0; i<h->radius && h->xy[i] != NULL; i++)
 	{
-		printf("2. hand_collision\n");
+		//printf("2. hand_collision\n");
 		//TODO: Need to modify this collision so more precise		
 		//printf("hand collision - hand coords, i: %d, x: %d, y: %d\n", i, hour->xy[i]->x, hour->xy[i]->y);
 		//if (c->x == x || c->y == y)
@@ -369,7 +369,7 @@ int hand_collision(int x, int y, hand* h)
 		if ((h->xy[i]->x >= x-3 && h->xy[i]->x <= x+3) &&
 			(h->xy[i]->y >= y-3 && h->xy[i]->y <= y+3))
 		{
-			printf("3. hand_collision\n");
+			//printf("3. hand_collision\n");
 			//hour_hand_moving = 1;
 			h->is_moving = 1;
 			r = 1;
