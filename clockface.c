@@ -284,7 +284,7 @@ void draw_face()
                                                                          
 void init_clock_face(SDL_Surface *screen, int scr_wid, int scr_hi)
 {	    
-	printf ("bytesperpixel: %i\n", screen->format->BytesPerPixel);
+	//printf ("bytesperpixel: %i\n", screen->format->BytesPerPixel);
 	//printf("circle test");
 	//return;
 	
@@ -316,21 +316,21 @@ void init_clock_face(SDL_Surface *screen, int scr_wid, int scr_hi)
 	  
 	 //add_hours(screen, r, x, y);	  
 	  
-	  printf("2. draw clock face - add hour\n");
+	  //printf("2. draw clock face - add hour\n");
 	  //if((hour = malloc(sizeof *hour)) != NULL)
 	  if((clockface->hour = malloc(sizeof *clockface->hour)) != NULL)
 	  {	  
-		  clockface->hour->minute = 50;
-		  clockface->hour->radius = RADIUS-50;
+		  clockface->hour->minute = 15;
+		  clockface->hour->radius = RADIUS-75;
 		  clockface->hour->color = SDL_MapRGB(clockface->screen->format, 0, 0, 255);
 		  add_hand(clockface->hour);
 	  }
 	  
-	  printf("3. draw clock face - add minute\n");
+	  //printf("3. draw clock face - add minute\n");
 	   if((clockface->minute = malloc(sizeof *clockface->minute)) != NULL)
 	  {	  
-		  clockface->minute->minute = 15;
-		  clockface->minute->radius = RADIUS-75;
+		  clockface->minute->minute = 40;
+		  clockface->minute->radius = RADIUS-50;
 		  clockface->minute->color = SDL_MapRGB(clockface->screen->format, 0, 255, 0);
 		  add_hand(clockface->minute);
 	  }
@@ -353,7 +353,7 @@ int hand_collision(int x, int y, hand* h)
 	
 	r = 0;
 	
-	printf("1. hand_collision\n");
+	//printf("1. hand_collision\n");
 	//printf("hand collision - mouse coords: %d, y: %d\n", x, y);
 	//printf("5. %dth element: x=%d, y=%d\n", 10, hour_hand[10]->x, hour_hand[10]->y);
 	
@@ -376,19 +376,19 @@ int hand_collision(int x, int y, hand* h)
 			break;
 		}
 	} 
-	printf("4. hand_collision\n");
+	//printf("4. hand_collision\n");
 	return r;
 }
 
 void handle_mouse_down(int x, int y)
 {
 	int is_collision;
-	printf("3. mouse down\n");
+	//printf("3. mouse down\n");
 	is_collision = hand_collision(x, y, clockface->hour);
-	printf("4. mouse down\n");
+	//printf("4. mouse down\n");
 	if (is_collision == 0)
 		is_collision = hand_collision(x, y, clockface->minute);
-	printf("5. mouse down\n");
+	//printf("5. mouse down\n");
 }
 
 //Returns polar coordinate angle (-iPI to +PI) from cartesian coordinates (i.e. x, y)
@@ -501,6 +501,15 @@ void handle_mouse_up(int x, int y)
 	}
 }
 
+int get_selected_hour()
+{
+	return clockface->hour->minute/5;
+}
+
+int get_selected_min()
+{
+	return clockface->minute->minute;
+}
 
 
 

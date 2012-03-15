@@ -3,7 +3,7 @@
 #include <SDL/SDL_ttf.h>
 #include "clockface.h"
 #include "clock.h"
-# include <math.h>
+#include <math.h>
 
 //void writeText2(char* txt, int x, int y);
 
@@ -41,9 +41,13 @@ int init() {
 	font = TTF_OpenFont("FreeSans.ttf", 26);
 	
 	Running = 1;
-	NewTime = 1;
+	//NewTime = 1;
 	
 	init_clock_face(screen, SCREEN_WIDTH, SCREEN_HEIGHT);
+	
+	generate_new_time();
+	
+	render_score() ;
 	
 	//writeText2("hey", 10, 10);
 	//writeText2("hey2222", 100, 100);
@@ -59,7 +63,8 @@ int events(SDL_Event *event) {
 			switch (event->key.keysym.sym) 
 			{					
 			   case SDLK_RETURN:
-				   NewTime = 1;
+				   totalTimes++;
+				   generate_new_time();
 				break;					
 			   case SDLK_q:
 				Running = 0;
@@ -69,7 +74,7 @@ int events(SDL_Event *event) {
 		case SDL_KEYUP:				      
 			break;
 		
-		case SDL_MOUSEBUTTONDOWN: 
+		case SDL_MOUSEBUTTONDOWN: 	
 			switch(event->button.button) {
 				case SDL_BUTTON_LEFT: 
 					mouse_x = event->motion.x;
@@ -106,6 +111,14 @@ int events(SDL_Event *event) {
 					mouse_y = event->motion.y;
 				
 					handle_mouse_up(mouse_x, mouse_y);
+				
+					does_selection_match();
+				
+					//printf("Current hour: %d\n", get_current_hour());
+					//printf("Current min: %d\n", get_current_min());
+					
+					
+					
 					break;			
 			}
 			break;
@@ -113,10 +126,30 @@ int events(SDL_Event *event) {
 
 }
 
+int does_selection_match()
+{
+	int retVal = 0;
+	
+	if (generated_hour == get_selected_hour() &&
+		generated_min == get_selected_min())
+	{
+		//printf("Time matches! gen hour: %d, sel hour: %d, gen min: %d, sel min: %d\n", 
+		//	generated_hour, get_selected_hour(), generated_min, get_selected_min());
+		totalTimes++;
+		correctTimes++;
+		generate_new_time();
+	}
+	else
+	{
+		printf("Time does NOT match! gen hour: %d, sel hour: %d, gen min: %d, sel min: %d\n", 
+			generated_hour, get_selected_hour(), generated_min, get_selected_min());
+	}		
+}
+
 int run() {
 	
 	SDL_Event event;
-	//int workDone = 0;
+	//int workDone = 0;	
 	
 	while (Running) {
 		
@@ -126,8 +159,8 @@ int run() {
 			//workDone = 1;
 			//printf("polling...\n");
 			events(&event);	
-			loop();
-			render();
+			//loop();
+			//render();
 		}
 		//if (workDone == 0)
 		SDL_Delay(100);
@@ -137,88 +170,96 @@ int run() {
 	}
 }
 
-int loop() {	
+int generate_new_time() {		
+	//int h;
+	//int m;
+	int len;
+			
+	//NewTime = 0;
 	
-	if (NewTime)
-	{		
-		int h;
-		int m;
-		int len;
-				
-		NewTime = 0;
-		
-		//todo: time_t is a restricted type, and 
-		//may not be meaningfully converted to unsigned int 
-		//on some systems?
-		srand ( (unsigned int)time ( NULL ) ); 
-		h = getHour();
-		m = getMinute();
-		len = hourMinToStr(h, m, TimeToDisplay);
-	}
-	
+	//todo: time_t is a restricted type, and 
+	//may not be meaningfully converted to unsigned int 
+	//on some systems?
+	srand ( (unsigned int)time ( NULL ) ); 
+	generated_hour = getHour();
+	generated_min = getMinute();
+	len = hourMinToStr(generated_hour, generated_min, timeToDisplay);
+	render_digital_clock();
+	render_score();
 	//check hand collision
 	
 }
 
-void draw_rectangle()
+void blank_out_background(int x, int y, int w, int h)
 {
 	SDL_Rect rect;
-	rect.x = 0;
-	rect.y = 50;
-	rect.w = SCREEN_WIDTH;
-	rect.h = 50;
+	rect.x = x;
+	rect.y = y;
+	rect.w = w;
+	rect.h = h;
 	Uint32 color = SDL_MapRGB(screen->format, 0xFF, 0x00, 0x00);
 	SDL_FillRect(screen, &rect, color);
 }
 
-/*void draw_background()
-{
-	SDL_Rect rect;
-	rect.x = 10;
-	rect.y = 10;
-	rect.w = 20;
-	rect.h = 20;
-	Uint32 color = SDL_MapRGB(screen->format, 0xFF, 0x00, 0x00);
-	SDL_FillRect(screen, &screen->clip_rect, color);
-	//DL_BlitSurface(textSurface, NULL, screen, &textLocation);
-	//SDL_Flip(screen);
-}*/
-
-int render() {
+void render_digital_clock() {
 	//SDL_Surface* textSurface = TTF_RenderText_Shaded(font, "Press return...", foregroundColor, backgroundColor);
-	draw_rectangle();
+	blank_out_background(0, 50, SCREEN_WIDTH, 50);
 	// Pass zero for width and height to draw the whole surface 
 	SDL_Rect textLocation = { SCREEN_WIDTH/2-20, 50, 0, 0 };
-	
-	/*SDL_Rect rect;
-	rect.x = 10;
-	rect.y = 10;
-	rect.w = 20;
-	rect.h = 20;
-	Uint32 color = SDL_MapRGB(screen->format, 0xFF, 0x00, 0x00);*/
-	//SDL_FillRect(screen, &screen->clip_rect, color);
-	
 	
 	SDL_Color foregroundColor = { 255, 255, 255 }; 
 	SDL_Color backgroundColor = { 0, 0, 255 };		
 	
-	//clear the screen
-	//SDL_FillRect(screen, &textLocation, 0);
-	//SDL_Flip(screen);
-
-	//SDL_Surface* textSurface = TTF_RenderText_Shaded(font, TimeToDisplay, foregroundColor, backgroundColor);
-	SDL_Surface* textSurface = TTF_RenderText_Blended(font, TimeToDisplay, foregroundColor);
+	SDL_Surface* textSurface = TTF_RenderText_Blended(font, timeToDisplay, foregroundColor);
 	
-	//draw_background();
-	//draw_rectangle();
-	
-	//SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0,0));
 	SDL_BlitSurface(textSurface, NULL, screen, &textLocation);
 	SDL_Flip(screen);
 	
 	SDL_FreeSurface(textSurface);	
+}
+
+void render_score() {
 	
-	//draw_circle(screen);
+	blank_out_background(0, 0, SCREEN_WIDTH, 50);
+	//SDL_Surface* textSurface = TTF_RenderText_Shaded(font, "Press return...", foregroundColor, backgroundColor);
+	//blank_out_background(0, 50, SCREEN_WIDTH, 50);
+	// Pass zero for width and height to draw the whole surface 
+	SDL_Rect textLocation = { SCREEN_WIDTH-200, 20, 0, 0 };
+	
+	SDL_Color foregroundColor = { 255, 255, 255 }; 
+	SDL_Color backgroundColor = { 0, 255, 255 };		
+		
+	//char* scoreStr;
+	
+	//Convert to function that can append strings and convert ints to string (i.e. itoa if I can figure it out!)
+	char scoreStr[50];
+	scoreStr[0] = 'S';
+	scoreStr[1] = 'c';
+	scoreStr[2] = 'o';
+	scoreStr[3] = 'r';
+	scoreStr[4] = 'e';
+	scoreStr[5] = ':';
+	scoreStr[6] = ' ';
+	scoreStr[7] = correctTimes + '0'; //TODO: handle case when score might be more than 10!
+	scoreStr[8] = ' ';
+	scoreStr[9] = 'o';
+	scoreStr[10] = 'f';
+	scoreStr[11] = ' ';
+	scoreStr[12] = totalTimes + '0';
+	scoreStr[13] = '\0';
+	//char* startStr = "Correct: ";
+	char* totalStr;	
+	//itoa(correct,totalStr);
+	//char * scoreStr = malloc(snprintf(NULL, 0, "%s %s", startStr, totalStr) + 1);
+	//scoreStr = "Correct: " + totalStr;
+	
+	//SDL_Surface* textSurface = TTF_RenderText_Blended(font, "Correct: " + correct + " of " + total, foregroundColor);
+	SDL_Surface* textSurface = TTF_RenderText_Blended(font, scoreStr, foregroundColor);
+	
+	SDL_BlitSurface(textSurface, NULL, screen, &textLocation);
+	SDL_Flip(screen);
+	
+	SDL_FreeSurface(textSurface);	
 }
 
 int cleanup() {
@@ -334,6 +375,33 @@ int hourMinToStr(int h, int m, char* s)
 		//s[4] = '\0';
 	printf("0=%d, 1=%d, 2=%d, 3=%d, 4=%d, 5=%d, i=%d, time: %s\n", s[0] - '0', s[1] - '0', s[2] - '0', s[3] - '0', s[4] - '0', s[5] - '0', i, s);
 	return i;
+}
+
+void itoa(int n, char s[])
+{
+    int i, sign;
+    if ((sign = n) < 0) /* record sign */
+        n = -n; /* make n positive */
+    i = 0;
+    do { /* generate digits in reverse order */
+        s[i++] = n % 10 + '0'; /* get next digit */
+    } while ((n /= 10) > 0); /* delete it */
+    if (sign < 0)
+        s[i++] = '-';
+    s[i] = '\0';
+    reverse(s);
+    return;
+}
+
+void reverse ( char *s )
+{
+  int i, j;
+  char c;
+  for ( i = 0, j = strlen ( s ) - 1; i < j; i++, j-- ) {
+    c = s[i];
+    s[i] = s[j];
+    s[j] = c;
+  }
 }
 
 

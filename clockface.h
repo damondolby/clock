@@ -58,3 +58,7 @@ void move_hand(int x, int y, hand *h);
 
 void handle_mouse_up(int x, int y);
 
+int get_selected_hour();
+
+int get_selected_min();
+
