@@ -459,8 +459,8 @@ void move_hand(int x, int y, hand *h)
 {
 	float angle = get_angle_from_coords(x, y);
 	//printf("1. mouse up after hand move attempt. Angle: %f, \n", angle);
-	int minute = convert_angle_to_clock_minute(angle);
-	//printf("20. mouse up after hand move attempt. Angle: %f, Minute: %d\n", angle, minute);		
+	int minute = round5(convert_angle_to_clock_minute(angle));
+	printf("20. mouse up after hand move attempt. Angle: %f, Minute: %d\n", angle, minute);		
 	
 	//draw_hand(screen, r, x, y, 30, hour_hand);
 	
