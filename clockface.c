@@ -228,14 +228,20 @@ coords * point_new(int x, int y)
 
 //TODO: change x and y to rx and ry to indicate centre of the circle
 //void draw_hand(SDL_Surface *screen, int r, int x, int y, int hand_minute, coords** cs, Uint8 R, Uint8 G, Uint8 B)
-void add_hand(hand* h)
+/*void add_hand(hand* h)
 {
 	draw_hand(h, h->color);
-}
+}*/
 
 void remove_hand(hand* h)
 {
 	draw_hand(h,  SDL_MapRGB(clockface->screen->format, 0, 0, 0));
+}
+
+void draw_hands()
+{
+	draw_hand(clockface->hour, clockface->hour->color);
+	draw_hand(clockface->minute, clockface->minute->color);
 }
 
 void draw_hand(hand* h, Uint32 color)
@@ -323,7 +329,7 @@ void init_clock_face(SDL_Surface *screen, int scr_wid, int scr_hi)
 		  clockface->hour->minute = 15;
 		  clockface->hour->radius = RADIUS-75;
 		  clockface->hour->color = SDL_MapRGB(clockface->screen->format, 0, 0, 255);
-		  add_hand(clockface->hour);
+		  //add_hand(clockface->hour);
 	  }
 	  
 	  //printf("3. draw clock face - add minute\n");
@@ -332,8 +338,10 @@ void init_clock_face(SDL_Surface *screen, int scr_wid, int scr_hi)
 		  clockface->minute->minute = 40;
 		  clockface->minute->radius = RADIUS-50;
 		  clockface->minute->color = SDL_MapRGB(clockface->screen->format, 0, 255, 0);
-		  add_hand(clockface->minute);
+		  //add_hand(clockface->minute);
 	  }
+	  
+	  draw_hands();
 	  
 	  //int i2 = 29;
 	  //printf("%dth element - xc: %d, xy: %d\n", i2, hour_hand[i2]->x, hour_hand[i2]->y);
@@ -439,7 +447,7 @@ int convert_angle_to_clock_minute(float angle)
 	// Apply 15 minute offset because polar coordinate 0 starts at the 15 minute position
 	minute = minute - 15;
 	
-	//printf("4. mouse up after hand move attempt. Angle: %f, Minute: %d\n", angle, minute);
+	printf("4. mouse up after hand move attempt. Angle: %f, Minute: %d\n", angle, minute);
 	
 	// Anything between the 0 to 15 mminute range will have ended up negative (so multiply by -1 to turn positive). 
 	//For anything < 15 subtract from 60 (remmbering polar coordinates work in an anti-clockwise direction - this is for anything between 45 and 60 minutes on the clock)
@@ -481,7 +489,7 @@ void move_hand(int x, int y, hand *h)
 	h->minute = minute;
 	
 	//printf("2. %dth element: x=%d, y=%d\n", 10, hour_hand[10]->x, hour_hand[10]->y);
-	add_hand(h);
+	//add_hand(h);
 	//printf("3. %dth element: x=%d, y=%d\n", 10, hour_hand[10]->x, hour_hand[10]->y);
 }
 
@@ -499,16 +507,26 @@ void handle_mouse_up(int x, int y)
 		//Move minute hand
 		move_hand(x, y, clockface->minute);
 	}
+	
+	draw_hands();
 }
 
 int get_selected_hour()
 {
-	return clockface->hour->minute/5;
+	//Slight hack as 0 makes no sense when comparing hours to a digital clock (will always expect to be 12). Possibly a better way to do this?
+	if (clockface->hour->minute == 0)
+		return 12;
+	else
+		return clockface->hour->minute/5;
 }
 
 int get_selected_min()
 {
-	return clockface->minute->minute;
+	//Slight hack as 60 makes no sense when comparing minutes to a digital clock (will always expect to be 0). Possibly a better way to do this?
+	if (clockface->minute->minute == 60)
+		return 0;
+	else
+		return clockface->minute->minute;
 }
 
 
