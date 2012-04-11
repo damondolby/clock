@@ -137,6 +137,7 @@ int does_selection_match()
 		//	generated_hour, get_selected_hour(), generated_min, get_selected_min());
 		totalTimes++;
 		correctTimes++;
+		make_background_flash();
 		generate_new_time();
 	}
 	else
@@ -144,6 +145,11 @@ int does_selection_match()
 		printf("Time does NOT match! gen hour: %d, sel hour: %d, gen min: %d, sel min: %d\n", 
 			generated_hour, get_selected_hour(), generated_min, get_selected_min());
 	}		
+}
+
+void make_background_flash()
+{
+	blank_out_background(0, 0, SCREEN_WIDTH, 50);
 }
 
 int run() {

@@ -33,5 +33,6 @@ int getMinute();
 int round5(int m);
 int hourMinToStr(int h, int m, char* s);
 int does_selection_match();
+void make_background_flash();
 void itoa(int n, char s[]);
 void reverse ( char *s );
