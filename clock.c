@@ -182,7 +182,7 @@ int run() {
 		while (SDL_PollEvent(&event))
 		{
 			//workDone = 1;
-			//printf("polling...\n");
+			printf("polling...\n");
 			events(&event);	
 			//loop();
 			//render();
