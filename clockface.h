@@ -4,6 +4,7 @@
 # include <unistd.h>
 # include <math.h>
 #include <SDL/SDL_ttf.h>
+#include "common.h"
 
 #define RADIUS 150
 

@@ -1,7 +1,6 @@
 #include <SDL/SDL.h>
 #include <stdlib.h>
 #include <SDL/SDL_ttf.h>
-#include "clockface.h"
 #include "clock.h"
 #include <math.h>
 
@@ -43,13 +42,28 @@ int init() {
 	Running = 1;
 	//NewTime = 1;
 	
-	init_clock_face(screen, SCREEN_WIDTH, SCREEN_HEIGHT);
+	//init_clock_face(screen, SCREEN_WIDTH, SCREEN_HEIGHT);
 	
-	generate_new_time();
+	//generate_new_time();		
 	
-	render_score() ;
+	//backgroundColor = { 64, 224, 208 };	
 	
-	//writeText2("hey", 10, 10);
+	backgroundColor = malloc(sizeof *backgroundColor);
+	backgroundColor->r = 154;
+	backgroundColor->g = 192;
+	backgroundColor->b= 205;
+	
+	fontColor = malloc(sizeof *fontColor);
+	fontColor->r = 16;
+	fontColor->g = 78;
+	fontColor->b= 139;
+	
+	blank_out_background(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, backgroundColor);
+	render_welcome_screen();
+	
+	//16;78;139
+	
+	//writeText2("hey", 10, 10); = { 64, 224, 208 }
 	//writeText2("hey2222", 100, 100);
 }
 
@@ -64,7 +78,7 @@ int events(SDL_Event *event) {
 			{					
 			   case SDLK_RETURN:
 				   totalTimes++;
-				   generate_new_time();
+				   start_game();
 				break;					
 			   case SDLK_q:
 				Running = 0;
@@ -149,7 +163,12 @@ int does_selection_match()
 
 void make_background_flash()
 {
-	blank_out_background(0, 0, SCREEN_WIDTH, 50);
+	//blank_out_background(0, 100, SCREEN_WIDTH, 50, 0x00, 0x00, 0x80);
+	blank_out_background((SCREEN_WIDTH/2)-75, 100, 150, 50, fontColor);
+	render_correct_text();
+	SDL_Delay(2000);
+	//blank_out_background(0, 100, SCREEN_WIDTH, 50, 0xb0, 0xc4, 0xde);
+	blank_out_background((SCREEN_WIDTH/2)-75, 100, 150, 50, backgroundColor);
 }
 
 int run() {
@@ -196,27 +215,41 @@ int generate_new_time() {
 	
 }
 
-void blank_out_background(int x, int y, int w, int h)
+void blank_out_background(int x, int y, int w, int h, SDL_Color *col)
 {
 	SDL_Rect rect;
 	rect.x = x;
 	rect.y = y;
 	rect.w = w;
 	rect.h = h;
-	Uint32 color = SDL_MapRGB(screen->format, 0xFF, 0x00, 0x00);
+	Uint32 color = SDL_MapRGB(screen->format, 
+				col->r, 
+				col->g, 
+				col->b);
 	SDL_FillRect(screen, &rect, color);
+	SDL_Flip(screen);
+}
+
+void start_game()
+{
+	//blank_out_background(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0xc4, 0xde);
+	blank_out_background(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, backgroundColor);
+	render_score();
+	generate_new_time();
+	init_clock_face(screen, SCREEN_WIDTH, SCREEN_HEIGHT);		
 }
 
 void render_digital_clock() {
 	//SDL_Surface* textSurface = TTF_RenderText_Shaded(font, "Press return...", foregroundColor, backgroundColor);
-	blank_out_background(0, 50, SCREEN_WIDTH, 50);
+	//blank_out_background(0, 50, SCREEN_WIDTH, 50, 0x1e, 0x90, 0xff);
+	blank_out_background(0, 50, SCREEN_WIDTH, 50, backgroundColor);	
 	// Pass zero for width and height to draw the whole surface 
 	SDL_Rect textLocation = { SCREEN_WIDTH/2-20, 50, 0, 0 };
 	
-	SDL_Color foregroundColor = { 255, 255, 255 }; 
-	SDL_Color backgroundColor = { 0, 0, 255 };		
+	//SDL_Color foregroundColor = { 255, 255, 255 }; 
+	//SDL_Color backgroundColor = { 0, 0, 255 };		
 	
-	SDL_Surface* textSurface = TTF_RenderText_Blended(font, timeToDisplay, foregroundColor);
+	SDL_Surface* textSurface = TTF_RenderText_Blended(font, timeToDisplay, *fontColor);
 	
 	SDL_BlitSurface(textSurface, NULL, screen, &textLocation);
 	SDL_Flip(screen);
@@ -226,14 +259,16 @@ void render_digital_clock() {
 
 void render_score() {
 	
-	blank_out_background(0, 0, SCREEN_WIDTH, 50);
+	//blank_out_background(0, 0, SCREEN_WIDTH, 50, 0x1e, 0x90, 0xff);	
+	blank_out_background(0, 0, SCREEN_WIDTH, 50, backgroundColor);
+	
 	//SDL_Surface* textSurface = TTF_RenderText_Shaded(font, "Press return...", foregroundColor, backgroundColor);
 	//blank_out_background(0, 50, SCREEN_WIDTH, 50);
 	// Pass zero for width and height to draw the whole surface 
 	SDL_Rect textLocation = { SCREEN_WIDTH-200, 20, 0, 0 };
 	
-	SDL_Color foregroundColor = { 255, 255, 255 }; 
-	SDL_Color backgroundColor = { 0, 255, 255 };		
+	//SDL_Color foregroundColor = { 255, 255, 255 }; 
+	//SDL_Color backgroundColor = { 0, 255, 255 };		
 		
 	//char* scoreStr;
 	
@@ -260,9 +295,60 @@ void render_score() {
 	//scoreStr = "Correct: " + totalStr;
 	
 	//SDL_Surface* textSurface = TTF_RenderText_Blended(font, "Correct: " + correct + " of " + total, foregroundColor);
-	SDL_Surface* textSurface = TTF_RenderText_Blended(font, scoreStr, foregroundColor);
+	SDL_Surface* textSurface = TTF_RenderText_Blended(font, scoreStr, *fontColor);
 	
 	SDL_BlitSurface(textSurface, NULL, screen, &textLocation);
+	SDL_Flip(screen);
+	
+	SDL_FreeSurface(textSurface);	
+}
+
+void render_welcome_screen() {
+	//blank_out_background(0, 0, SCREEN_WIDTH, 50);
+	//SDL_Surface* textSurface = TTF_RenderText_Shaded(font, "Press return...", foregroundColor, backgroundColor);
+	//blank_out_background(0, 50, SCREEN_WIDTH, 50);
+	// Pass zero for width and height to draw the whole surface 
+	SDL_Rect textLocation = { 100, 200, 0, 0 };
+	SDL_Rect textLocation2 = { 100, 230, 0, 0 };
+	
+	//SDL_Color foregroundColor = { 255, 255, 255 }; 
+	//SDL_Color backgroundColor = { 0, 255, 255 };		
+		
+	char* welcomeStr;	
+	char* welcomeStr2;
+	
+	welcomeStr = "Match the digital clock onto the";
+	welcomeStr2 = "analogue clock . Press return...";
+	
+	SDL_Surface* textSurface = TTF_RenderText_Blended(font, welcomeStr, *fontColor);	
+	SDL_BlitSurface(textSurface, NULL, screen, &textLocation);	
+	
+	SDL_Surface* textSurface2 = TTF_RenderText_Blended(font, welcomeStr2, *fontColor);	
+	SDL_BlitSurface(textSurface2, NULL, screen, &textLocation2);	
+	
+	SDL_Flip(screen);
+	
+	SDL_FreeSurface(textSurface);	
+	SDL_FreeSurface(textSurface2);	
+}
+
+void render_correct_text() {
+	//blank_out_background(0, 0, SCREEN_WIDTH, 50);
+	//SDL_Surface* textSurface = TTF_RenderText_Shaded(font, "Press return...", foregroundColor, backgroundColor);
+	//blank_out_background(0, 50, SCREEN_WIDTH, 50);
+	// Pass zero for width and height to draw the whole surface 
+	SDL_Rect textLocation = { (SCREEN_WIDTH/2)-50, 110, 0, 0 };
+	
+	//SDL_Color foregroundColor = { 255, 255, 255 }; 
+	//SDL_Color backgroundColor = { 0, 255, 255 };		
+		
+	char* str;	
+	
+	str = "Correct!";
+	
+	SDL_Surface* textSurface = TTF_RenderText_Blended(font, str, *backgroundColor);	
+	SDL_BlitSurface(textSurface, NULL, screen, &textLocation);	
+		
 	SDL_Flip(screen);
 	
 	SDL_FreeSurface(textSurface);	
