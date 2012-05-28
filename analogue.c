@@ -6,7 +6,7 @@
 # include <unistd.h>
 # include <math.h>
 #include <SDL/SDL_ttf.h>
-#include "clockface.h"
+#include "analogue.h"
 
 /*http://tille.garrels.be/training/sdl/circle.php*/
 
