@@ -69,6 +69,10 @@ int init() {
 
 int events(SDL_Event *event) {
 	
+	//printf("hey: %d \n", event->motion.x);
+	//if (event->motion)
+	handle_mouse_move(event->motion.x, event->motion.y);
+	
 	switch( event->type ){
 		case SDL_QUIT:
 			Running = 0;
@@ -182,7 +186,6 @@ int run() {
 		while (SDL_PollEvent(&event))
 		{
 			//workDone = 1;
-			printf("polling...\n");
 			events(&event);	
 			//loop();
 			//render();

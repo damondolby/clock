@@ -256,7 +256,7 @@ void draw_hand(hand* h, Uint32 color)
 	
 	pi_factor = M_PI * ((hand_minute * 6) / 180.0);
 	//printf("Sum: %f\n", (hand_minute * 6) / 180.0);
-	printf("hand: %i, pi_factor: %f\n", hand_minute, pi_factor);
+	//printf("hand: %i, pi_factor: %f\n", hand_minute, pi_factor);
 	
 	for (i=0; i<h->radius; i++)
 	{		
@@ -395,6 +395,9 @@ void handle_mouse_down(int x, int y)
 	//printf("4. mouse down\n");
 	if (is_collision == 0)
 		is_collision = hand_collision(x, y, clockface->minute);
+	
+	if (is_collision == 1)
+		event_count = 0;
 	//printf("5. mouse down\n");
 }
 
@@ -409,7 +412,7 @@ float get_angle_from_coords(int x, int y)
 	//int rx = scr_wid/2;
 	//int ry = scr_hi - RADIUS - 20;
 	
-	printf("Getting Angle. x=%d, y=%d, rx=%d, ry=%d\n", clockface->centre->x, clockface->centre->y, x, y);
+	//printf("Getting Angle. x=%d, y=%d, rx=%d, ry=%d\n", clockface->centre->x, clockface->centre->y, x, y);
 			
 	//angle = (atan2(ry-y, x-rx) / M_PI) * 180;	
 	angle = atan2(clockface->centre->y-y, x-clockface->centre->x);
@@ -446,7 +449,7 @@ int convert_angle_to_clock_minute(float angle)
 	// Apply 15 minute offset because polar coordinate 0 starts at the 15 minute position
 	minute = minute - 15;
 	
-	printf("4. mouse up after hand move attempt. Angle: %f, Minute: %d\n", angle, minute);
+	//printf("4. mouse up after hand move attempt. Angle: %f, Minute: %d\n", angle, minute);
 	
 	// Anything between the 0 to 15 mminute range will have ended up negative (so multiply by -1 to turn positive). 
 	//For anything < 15 subtract from 60 (remmbering polar coordinates work in an anti-clockwise direction - this is for anything between 45 and 60 minutes on the clock)
@@ -467,7 +470,7 @@ void move_hand(int x, int y, hand *h)
 	float angle = get_angle_from_coords(x, y);
 	//printf("1. mouse up after hand move attempt. Angle: %f, \n", angle);
 	int minute = round5(convert_angle_to_clock_minute(angle));
-	printf("20. mouse up after hand move attempt. Angle: %f, Minute: %d\n", angle, minute);		
+	//printf("20. mouse up after hand move attempt. Angle: %f, Minute: %d\n", angle, minute);		
 	
 	//draw_hand(screen, r, x, y, 30, hour_hand);
 	
@@ -483,8 +486,7 @@ void move_hand(int x, int y, hand *h)
 	//draw_hand(h, 0, 0, 0);
 	//TODO: better way to remove hands?
 	remove_hand(h);
-	
-	h->is_moving = 0;
+		
 	h->minute = minute;
 	
 	//printf("2. %dth element: x=%d, y=%d\n", 10, hour_hand[10]->x, hour_hand[10]->y);
@@ -499,16 +501,47 @@ void handle_mouse_up(int x, int y)
 		//printf("1. handle_mouse_up - hour. x=%d, y=%d\n", x, y);
 		//Move hour hand
 		move_hand(x, y, clockface->hour);
+		clockface->hour->is_moving = 0;
 	}
 	else if (clockface->minute->is_moving == 1)
 	{
 		//printf("2. handle_mouse_up - hour\n");
 		//Move minute hand
 		move_hand(x, y, clockface->minute);
+		clockface->minute->is_moving = 0;
 	}
 	
 	draw_hands();
 }
+
+void handle_mouse_move(int x, int y)
+{	
+	event_count++;
+	
+	//Only move for every X events (as too slow to try and move for every event)
+	if (event_count % EVENT_SKIP == 0)
+	{
+		if (clockface != NULL)
+		{
+			//printf("moving...");	
+			if (clockface->hour->is_moving == 1)
+			{
+				//printf("1. handle_mouse_move - hour. x=%d, y=%d\n", x, y);
+				//Move hour hand
+				move_hand(x, y, clockface->hour);
+			}
+			else if (clockface->minute->is_moving == 1)
+			{
+				//printf("2. handle_mouse_move - hour\n");
+				//Move minute hand
+				move_hand(x, y, clockface->minute);
+			}
+			
+			draw_hands();
+		}
+	}
+}
+
 
 int get_selected_hour()
 {

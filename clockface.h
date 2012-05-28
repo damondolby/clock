@@ -7,6 +7,7 @@
 #include "common.h"
 
 #define RADIUS 150
+#define EVENT_SKIP 5 /*Number of events to skip when dragging so not continutally redrawing (which takes time)*/
 
 typedef struct {
 	int x;
@@ -30,6 +31,8 @@ typedef struct {
 } clock;
 
 clock *clockface;
+
+int event_count; /*Event count when dragging a hand*/
 
 void draw_pixel(int x, int y, Uint32 color);
 
@@ -58,6 +61,8 @@ int convert_angle_to_clock_minute(float angle);
 void move_hand(int x, int y, hand *h);
 
 void handle_mouse_up(int x, int y);
+
+void handle_mouse_move(int x, int y);
 
 int get_selected_hour();
 
