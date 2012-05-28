@@ -8,7 +8,7 @@
 
 int main() {
 	
-	//gcc clock.c clockface.c -lSDL -lSDL_ttf -o clock.out
+	//gcc clock.c analogue.c -lSDL -lSDL_ttf -o clock.out
 
 	init();
 	
@@ -81,8 +81,9 @@ int events(SDL_Event *event) {
 			switch (event->key.keysym.sym) 
 			{					
 			   case SDLK_RETURN:
-				   totalTimes++;
-				   start_game();
+				   if (!pre_game)
+					totalTimes++;
+				   display_new_time();
 				break;					
 			   case SDLK_q:
 				Running = 0;
@@ -233,8 +234,9 @@ void blank_out_background(int x, int y, int w, int h, SDL_Color *col)
 	SDL_Flip(screen);
 }
 
-void start_game()
+void display_new_time()
 {
+	pre_game = 0;
 	//blank_out_background(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0xc4, 0xde);
 	blank_out_background(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, backgroundColor);
 	render_score();

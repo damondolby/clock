@@ -10,6 +10,7 @@
 //64-224-208
 
 int Running;
+int pre_game = 1;
 SDL_Surface *screen;
 TTF_Font* font;
 //int NewTime;
@@ -33,7 +34,7 @@ int events(SDL_Event *event);
 int run();
 int generate_new_time();
 void blank_out_background(int x, int y, int w, int h, SDL_Color* col);
-void start_game();
+void display_new_time();
 void render_digital_clock();
 void render_score();
 void render_welcome_screen();
