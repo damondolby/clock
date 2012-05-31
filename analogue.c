@@ -306,7 +306,8 @@ void init_clock_face(SDL_Surface *screen, int scr_wid, int scr_hi)
 		 if((clockface->centre = malloc(sizeof *clockface->centre)) != NULL)
 		{
 			//From radius and screen width/height set centre of the circle rx and ry
-			clockface->centre->x = scr_wid/2;
+			//Circle is two thirds of the way across the screen.
+			clockface->centre->x = (scr_wid/3)*2;
 			clockface->centre->y = scr_hi - RADIUS - 20;		
 			clockface->screen = screen;
 			clockface->color = SDL_MapRGB(clockface->screen->format, fontColor->r, fontColor->g, fontColor->b);

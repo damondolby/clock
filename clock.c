@@ -38,6 +38,7 @@ int init() {
 	TTF_Init();      
 	
 	font = TTF_OpenFont("FreeSans.ttf", 26);
+	biggerFont = TTF_OpenFont("FreeSans.ttf", 56);
 	
 	Running = 1;
 	//NewTime = 1;
@@ -169,7 +170,7 @@ int does_selection_match()
 void make_background_flash()
 {
 	//blank_out_background(0, 100, SCREEN_WIDTH, 50, 0x00, 0x00, 0x80);
-	blank_out_background((SCREEN_WIDTH/2)-75, 100, 150, 50, fontColor);
+	//blank_out_background((SCREEN_WIDTH/2)-75, 100, 150, 50, fontColor);	
 	render_correct_text();
 	SDL_Delay(2000);
 	//blank_out_background(0, 100, SCREEN_WIDTH, 50, 0xb0, 0xc4, 0xde);
@@ -248,13 +249,23 @@ void render_digital_clock() {
 	//SDL_Surface* textSurface = TTF_RenderText_Shaded(font, "Press return...", foregroundColor, backgroundColor);
 	//blank_out_background(0, 50, SCREEN_WIDTH, 50, 0x1e, 0x90, 0xff);
 	blank_out_background(0, 50, SCREEN_WIDTH, 50, backgroundColor);	
-	// Pass zero for width and height to draw the whole surface 
-	SDL_Rect textLocation = { SCREEN_WIDTH/2-20, 50, 0, 0 };
+	
+	
+	//Box behind text box (to create border effect)
+	//blank_out_background(SCREEN_WIDTH/2-22, 45, 102, 62, fontColor);
+	blank_out_background(20, SCREEN_HEIGHT/2, 200, 140, fontColor);
+	
+	blank_out_background(25, (SCREEN_HEIGHT/2)+5, 190, 130, backgroundColor);
+	
+	//blank_out_background(SCREEN_WIDTH/2-20, 50, 100, 50, backgroundColor);
+	
+	//SDL_Rect textLocation = { SCREEN_WIDTH/2-20, 50, 0, 0 };
+	SDL_Rect textLocation = { 50, (SCREEN_HEIGHT/2)+20, 0, 0 };
 	
 	//SDL_Color foregroundColor = { 255, 255, 255 }; 
 	//SDL_Color backgroundColor = { 0, 0, 255 };		
 	
-	SDL_Surface* textSurface = TTF_RenderText_Blended(font, timeToDisplay, *fontColor);
+	SDL_Surface* textSurface = TTF_RenderText_Blended(biggerFont, timeToDisplay, *fontColor);
 	
 	SDL_BlitSurface(textSurface, NULL, screen, &textLocation);
 	SDL_Flip(screen);
@@ -342,16 +353,20 @@ void render_correct_text() {
 	//SDL_Surface* textSurface = TTF_RenderText_Shaded(font, "Press return...", foregroundColor, backgroundColor);
 	//blank_out_background(0, 50, SCREEN_WIDTH, 50);
 	// Pass zero for width and height to draw the whole surface 
-	SDL_Rect textLocation = { (SCREEN_WIDTH/2)-50, 110, 0, 0 };
+	//SDL_Rect textLocation = { (SCREEN_WIDTH/2)-50, 110, 0, 0 };
+	
+	blank_out_background(25, (SCREEN_HEIGHT/2)+5, 190, 130, fontColor);
+	
+	SDL_Rect textLocation = { 40, (SCREEN_HEIGHT/2)+20, 0, 0 };
 	
 	//SDL_Color foregroundColor = { 255, 255, 255 }; 
 	//SDL_Color backgroundColor = { 0, 255, 255 };		
 		
 	char* str;	
 	
-	str = "Correct!";
+	str = "Good!";
 	
-	SDL_Surface* textSurface = TTF_RenderText_Blended(font, str, *backgroundColor);	
+	SDL_Surface* textSurface = TTF_RenderText_Blended(biggerFont, str, *backgroundColor);	
 	SDL_BlitSurface(textSurface, NULL, screen, &textLocation);	
 		
 	SDL_Flip(screen);

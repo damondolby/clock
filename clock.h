@@ -13,6 +13,7 @@ int Running;
 int pre_game = 1;
 SDL_Surface *screen;
 TTF_Font* font;
+TTF_Font* biggerFont;
 //int NewTime;
 char timeToDisplay[5];
 int correctTimes = 0;
