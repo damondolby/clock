@@ -38,7 +38,7 @@ int init() {
 	
 	//initialise fonts and colours
 	font = TTF_OpenFont("FreeSans.ttf", 26);
-	biggerFont = TTF_OpenFont("FreeSans.ttf", 56);	
+	bigger_font = TTF_OpenFont("FreeSans.ttf", 56);	
 	
 	backgroundColor = malloc(sizeof *backgroundColor);
 	backgroundColor->r = 154;
@@ -90,7 +90,7 @@ int events(SDL_Event *event) {
 			{					
 			   case SDLK_RETURN:
 				   if (!pre_game)
-					totalTimes++;
+					total_times++;
 				   else
 				   {
 					//Reset goes left and time if it's pre-game
@@ -189,9 +189,9 @@ int generate_new_time() {
 	//may not be meaningfully converted to unsigned int 
 	//on some systems?
 	srand ( (unsigned int)time ( NULL ) ); 
-	generated_hour = getHour();
-	generated_min = getMinute();
-	len = hourMinToStr(generated_hour, generated_min, timeToDisplay);
+	generated_hour = get_hour();
+	generated_min = get_minute();
+	len = hour_min_to_str(generated_hour, generated_min, time_to_display);
 	render_digital_clock();
 	render_score();
 	render_timer();	
@@ -238,7 +238,7 @@ void render_digital_clock() {
 	
 	SDL_Rect textLocation = { 50, (SCREEN_HEIGHT/2)+20, 0, 0 };
 		
-	SDL_Surface* textSurface = TTF_RenderText_Blended(biggerFont, timeToDisplay, *fontColor);
+	SDL_Surface* textSurface = TTF_RenderText_Blended(bigger_font, time_to_display, *fontColor);
 	
 	SDL_BlitSurface(textSurface, NULL, screen, &textLocation);
 	SDL_Flip(screen);
@@ -285,8 +285,8 @@ void render_score() {
 
 	char str[50], correctStr[3], totalStr[3];	
 	
-	itoa(correctTimes, correctStr);
-	itoa(totalTimes, totalStr);
+	itoa(correct_times, correctStr);
+	itoa(total_times, totalStr);
 	
 	itoa(goes_left, str); 
 	
@@ -363,7 +363,7 @@ void render_correct_text() {
 	
 	str = "Good!";
 	
-	SDL_Surface* textSurface = TTF_RenderText_Blended(biggerFont, str, *backgroundColor);	
+	SDL_Surface* textSurface = TTF_RenderText_Blended(bigger_font, str, *backgroundColor);	
 	SDL_BlitSurface(textSurface, NULL, screen, &textLocation);	
 		
 	SDL_Flip(screen);
@@ -377,13 +377,13 @@ int cleanup() {
 	SDL_Quit();
 }
 
-int getHour() {
+int get_hour() {
 	int x;
 	x = rand(); // everytime it is different because the seed is different.
 	return (x % 12) + 1;
 }
 
-int getMinute() {
+int get_minute() {
 	int x, m, r;
 	char s;	
 	x = rand(); // everytime it is different because the seed is different.
@@ -414,7 +414,7 @@ int round5(int m) {
 	return (y*10)+x; //TODO: round to 5
 }
 
-int hourMinToStr(int h, int m, char* s) {
+int hour_min_to_str(int h, int m, char* s) {
 	int i = 0;
 	
 	if (h >= 10)
