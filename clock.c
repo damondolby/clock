@@ -40,19 +40,19 @@ int init() {
 	font = TTF_OpenFont("FreeSans.ttf", 26);
 	bigger_font = TTF_OpenFont("FreeSans.ttf", 56);	
 	
-	backgroundColor = malloc(sizeof *backgroundColor);
-	backgroundColor->r = 154;
-	backgroundColor->g = 192;
-	backgroundColor->b= 205;
+	background_color = malloc(sizeof *background_color);
+	background_color->r = 154;
+	background_color->g = 192;
+	background_color->b= 205;
 	
-	fontColor = malloc(sizeof *fontColor);
-	fontColor->r = 16;
-	fontColor->g = 78;
-	fontColor->b= 139;
+	font_color = malloc(sizeof *font_color);
+	font_color->r = 16;
+	font_color->g = 78;
+	font_color->b= 139;
 	
 	running = 1;
 	
-	blank_out_background(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, backgroundColor);
+	blank_out_background(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, background_color);
 	render_welcome_screen();
 }
 
@@ -177,7 +177,7 @@ int does_selection_match() {
 void make_background_flash(){	
 	render_correct_text();
 	SDL_Delay(500);
-	blank_out_background((SCREEN_WIDTH/2)-75, 100, 150, 50, backgroundColor);
+	blank_out_background((SCREEN_WIDTH/2)-75, 100, 150, 50, background_color);
 }
 
 /*Generate a new digital clock (and render score/timer)*/
@@ -223,7 +223,7 @@ void blank_out_background(int x, int y, int w, int h, SDL_Color *col) {
 /*Generate/Render/Display new digital clock*/
 void display_new_time() {
 	pre_game = 0;
-	blank_out_background(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, backgroundColor);
+	blank_out_background(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, background_color);
 	render_score();	
 	generate_new_time();
 	init_clock_face(screen, SCREEN_WIDTH, SCREEN_HEIGHT);		
@@ -232,13 +232,13 @@ void display_new_time() {
 void render_digital_clock() {	
 	
 	//Box behind digital clock (to create border effect)
-	blank_out_background(20, SCREEN_HEIGHT/2, 200, 140, fontColor);
+	blank_out_background(20, SCREEN_HEIGHT/2, 200, 140, font_color);
 	
-	blank_out_background(25, (SCREEN_HEIGHT/2)+5, 190, 130, backgroundColor);	
+	blank_out_background(25, (SCREEN_HEIGHT/2)+5, 190, 130, background_color);	
 	
 	SDL_Rect textLocation = { 50, (SCREEN_HEIGHT/2)+20, 0, 0 };
 		
-	SDL_Surface* textSurface = TTF_RenderText_Blended(bigger_font, time_to_display, *fontColor);
+	SDL_Surface* textSurface = TTF_RenderText_Blended(bigger_font, time_to_display, *font_color);
 	
 	SDL_BlitSurface(textSurface, NULL, screen, &textLocation);
 	SDL_Flip(screen);
@@ -248,17 +248,17 @@ void render_digital_clock() {
 
 void render_timer_bg() {
 	
-	blank_out_background(20, 20, 250, 140, fontColor);
+	blank_out_background(20, 20, 250, 140, font_color);
 	
 	//Box behind text box (to create border effect)
-	blank_out_background(25, 25, 240, 130, backgroundColor);
+	blank_out_background(25, 25, 240, 130, background_color);
 	
 	SDL_Flip(screen);
 }
 
 void render_timer() {
 	
-	blank_out_background(50, 40, 210, 40, backgroundColor);
+	blank_out_background(50, 40, 210, 40, background_color);
 	
 	SDL_Rect textLocation = { 50, 40, 0, 0 };		
 	
@@ -268,7 +268,7 @@ void render_timer() {
 	itoa(time, str); //This will need enhancing to convert double if decimal places need to be displayed.
 	strcat (str," seconds");
 	
-	SDL_Surface* textSurface = TTF_RenderText_Blended(font, str, *fontColor);
+	SDL_Surface* textSurface = TTF_RenderText_Blended(font, str, *font_color);
 	
 	SDL_BlitSurface(textSurface, NULL, screen, &textLocation);	
 	
@@ -279,7 +279,7 @@ void render_timer() {
 
 void render_score() {
 	
-	blank_out_background(50, 80, 210, 40, backgroundColor);
+	blank_out_background(50, 80, 210, 40, background_color);
 	
 	SDL_Rect textLocation = { 50, 80, 0, 0 };
 
@@ -292,7 +292,7 @@ void render_score() {
 	
 	strcat (str," goes left");
 	
-	SDL_Surface* textSurface = TTF_RenderText_Blended(font, str, *fontColor);
+	SDL_Surface* textSurface = TTF_RenderText_Blended(font, str, *font_color);
 	
 	SDL_BlitSurface(textSurface, NULL, screen, &textLocation);
 	SDL_Flip(screen);
@@ -310,10 +310,10 @@ void render_welcome_screen() {
 	welcomeStr = "Match the digital clock onto the";
 	welcomeStr2 = "analogue clock . Press return...";
 	
-	SDL_Surface* textSurface = TTF_RenderText_Blended(font, welcomeStr, *fontColor);	
+	SDL_Surface* textSurface = TTF_RenderText_Blended(font, welcomeStr, *font_color);	
 	SDL_BlitSurface(textSurface, NULL, screen, &textLocation);	
 	
-	SDL_Surface* textSurface2 = TTF_RenderText_Blended(font, welcomeStr2, *fontColor);	
+	SDL_Surface* textSurface2 = TTF_RenderText_Blended(font, welcomeStr2, *font_color);	
 	SDL_BlitSurface(textSurface2, NULL, screen, &textLocation2);	
 	
 	SDL_Flip(screen);
@@ -324,7 +324,7 @@ void render_welcome_screen() {
 
 void render_final_screen() {
 	
-	blank_out_background(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, backgroundColor);
+	blank_out_background(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, background_color);
 	
 	SDL_Rect textLocation = { 100, 200, 0, 0 };
 	SDL_Rect textLocation2 = { 100, 230, 0, 0 };
@@ -342,10 +342,10 @@ void render_final_screen() {
 	
 	welcomeStr2 = "Press return to go again...";
 	
-	SDL_Surface* textSurface = TTF_RenderText_Blended(font, str, *fontColor);	
+	SDL_Surface* textSurface = TTF_RenderText_Blended(font, str, *font_color);	
 	SDL_BlitSurface(textSurface, NULL, screen, &textLocation);	
 	
-	SDL_Surface* textSurface2 = TTF_RenderText_Blended(font, welcomeStr2, *fontColor);	
+	SDL_Surface* textSurface2 = TTF_RenderText_Blended(font, welcomeStr2, *font_color);	
 	SDL_BlitSurface(textSurface2, NULL, screen, &textLocation2);	
 	
 	SDL_Flip(screen);
@@ -355,7 +355,7 @@ void render_final_screen() {
 }
 
 void render_correct_text() {	
-	blank_out_background(25, (SCREEN_HEIGHT/2)+5, 190, 130, fontColor);
+	blank_out_background(25, (SCREEN_HEIGHT/2)+5, 190, 130, font_color);
 	
 	SDL_Rect textLocation = { 40, (SCREEN_HEIGHT/2)+20, 0, 0 };	
 		
@@ -363,7 +363,7 @@ void render_correct_text() {
 	
 	str = "Good!";
 	
-	SDL_Surface* textSurface = TTF_RenderText_Blended(bigger_font, str, *backgroundColor);	
+	SDL_Surface* textSurface = TTF_RenderText_Blended(bigger_font, str, *background_color);	
 	SDL_BlitSurface(textSurface, NULL, screen, &textLocation);	
 		
 	SDL_Flip(screen);

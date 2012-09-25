@@ -98,11 +98,11 @@ void write_clock_text(char* txt, TTF_Font* font, int x, int y)
 	SDL_Rect textLocation2 = { x+50, y+50, 0, 0 };
 	
 	//SDL_Color foregroundColor = { 255, 255, 0 }; 
-	//SDL_Color backgroundColor = { 0, 0, 255 };
+	//SDL_Color background_color = { 0, 0, 255 };
 	
-	//SDL_Surface* textSurface = TTF_RenderText_Shaded(font, "This is mytext.", foregroundColor, backgroundColor);
-	SDL_Surface* textSurface = TTF_RenderText_Blended(font, txt, *fontColor);
-	//SDL_Surface* textSurface2 = TTF_RenderText_Shaded(font, "text", foregroundColor, backgroundColor);
+	//SDL_Surface* textSurface = TTF_RenderText_Shaded(font, "This is mytext.", foregroundColor, background_color);
+	SDL_Surface* textSurface = TTF_RenderText_Blended(font, txt, *font_color);
+	//SDL_Surface* textSurface2 = TTF_RenderText_Shaded(font, "text", foregroundColor, background_color);
 
 	//SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 100, 0, 0));
 	SDL_BlitSurface(textSurface, NULL, clockface->screen, &textLocation);
@@ -234,7 +234,7 @@ coords * point_new(int x, int y)
 
 void remove_hand(hand* h)
 {
-	draw_hand(h,  SDL_MapRGB(clockface->screen->format, backgroundColor->r, backgroundColor->g, backgroundColor->b));
+	draw_hand(h,  SDL_MapRGB(clockface->screen->format, background_color->r, background_color->g, background_color->b));
 }
 
 void draw_hands()
@@ -310,7 +310,7 @@ void init_clock_face(SDL_Surface *screen, int scr_wid, int scr_hi)
 			clockface->centre->x = (scr_wid/3)*2;
 			clockface->centre->y = scr_hi - RADIUS - 20;		
 			clockface->screen = screen;
-			clockface->color = SDL_MapRGB(clockface->screen->format, fontColor->r, fontColor->g, fontColor->b);
+			clockface->color = SDL_MapRGB(clockface->screen->format, font_color->r, font_color->g, font_color->b);
 		}		
 	  }
 	
@@ -328,7 +328,7 @@ void init_clock_face(SDL_Surface *screen, int scr_wid, int scr_hi)
 	  {	  
 		  clockface->hour->minute = 15;
 		  clockface->hour->radius = RADIUS-75;
-		  clockface->hour->color = SDL_MapRGB(clockface->screen->format, fontColor->r, fontColor->g, fontColor->b);
+		  clockface->hour->color = SDL_MapRGB(clockface->screen->format, font_color->r, font_color->g, font_color->b);
 		  //add_hand(clockface->hour);
 	  }
 	  
@@ -337,7 +337,7 @@ void init_clock_face(SDL_Surface *screen, int scr_wid, int scr_hi)
 	  {	  
 		  clockface->minute->minute = 40;
 		  clockface->minute->radius = RADIUS-50;
-		  clockface->minute->color = SDL_MapRGB(clockface->screen->format, fontColor->r, fontColor->g, fontColor->b);
+		  clockface->minute->color = SDL_MapRGB(clockface->screen->format, font_color->r, font_color->g, font_color->b);
 		  //add_hand(clockface->minute);
 	  }
 	  

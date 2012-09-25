@@ -1,4 +1,4 @@
 # include <stdlib.h>
 
-SDL_Color* backgroundColor;	
-SDL_Color* fontColor;
+SDL_Color* background_color;	
+SDL_Color* font_color;
