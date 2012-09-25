@@ -9,7 +9,7 @@
 int main() {
 	
 	//gcc clock.c analogue.c -lSDL -lSDL_ttf -o clock.out
-
+	
 	init();
 	
 	run();
@@ -62,17 +62,44 @@ int init() {
 	blank_out_background(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, backgroundColor);
 	render_welcome_screen();
 	
+	
 	//16;78;139
 	
 	//writeText2("hey", 10, 10); = { 64, 224, 208 }
 	//writeText2("hey2222", 100, 100);
 }
 
+int run() {
+	
+	SDL_Event event;
+	//int workDone = 0;	
+	
+	while (Running) {
+		
+		//printf("running...\n");
+		while (SDL_PollEvent(&event))
+		{			
+			//workDone = 1;
+			events(&event);	
+			//loop();
+			//render();
+		}
+		//if (workDone == 0)
+		SDL_Delay(100);
+		if (!pre_game)
+			render_timer();
+		//SDL_WaitEvent();
+			//sleep(1);
+		//workDone = 0;
+	}
+}
+
 int events(SDL_Event *event) {
 	
 	//printf("hey: %d \n", event->motion.x);
 	//if (event->motion)
-	handle_mouse_move(event->motion.x, event->motion.y);
+	if (!pre_game)
+		handle_mouse_move(event->motion.x, event->motion.y);
 	
 	switch( event->type ){
 		case SDL_QUIT:
@@ -84,6 +111,14 @@ int events(SDL_Event *event) {
 			   case SDLK_RETURN:
 				   if (!pre_game)
 					totalTimes++;
+				   else
+				   {
+					goes_left = MAX_GOES;
+					//render_timer_bg();
+					//start_time = time(NULL);
+					time (&start);
+					//printf("start time %s", ctime(&start));
+				   }
 				   display_new_time();
 				break;					
 			   case SDLK_q:
@@ -97,17 +132,21 @@ int events(SDL_Event *event) {
 		case SDL_MOUSEBUTTONDOWN: 	
 			switch(event->button.button) {
 				case SDL_BUTTON_LEFT: 
-					mouse_x = event->motion.x;
-					mouse_y = event->motion.y;
-					//printf("left pressed. x:%d, y:%d\n", event->motion.x, event->motion.y);
-					//OnLButtonDown(Event->button.x,Event->button.y);
 					
-					//if (hand_collision(mouse_x, mouse_y))
-					//{
-					//	printf("yes!\n");
-					//}
-					//printf("1. mouse down\n");
-					handle_mouse_down(mouse_x, mouse_y);
+					if (!pre_game)
+					{
+						mouse_x = event->motion.x;
+						mouse_y = event->motion.y;
+						//printf("left pressed. x:%d, y:%d\n", event->motion.x, event->motion.y);
+						//OnLButtonDown(Event->button.x,Event->button.y);
+						
+						//if (hand_collision(mouse_x, mouse_y))
+						//{
+						//	printf("yes!\n");
+						//}
+						//printf("1. mouse down\n");
+						handle_mouse_down(mouse_x, mouse_y);
+					}
 					//printf("2. mouse down\n");
 					break;
 				
@@ -123,19 +162,24 @@ int events(SDL_Event *event) {
 			break;
 			
 		case SDL_MOUSEBUTTONUP: 
-			
 			switch(event->button.button) {
 				case SDL_BUTTON_LEFT:
 					
-					mouse_x = event->motion.x;
-					mouse_y = event->motion.y;
-				
-					handle_mouse_up(mouse_x, mouse_y);
-				
-					does_selection_match();
-				
-					//printf("Current hour: %d\n", get_current_hour());
-					//printf("Current min: %d\n", get_current_min());
+					if (!pre_game)
+					{
+					
+						mouse_x = event->motion.x;
+						mouse_y = event->motion.y;
+					
+						handle_mouse_up(mouse_x, mouse_y);
+					
+						does_selection_match();
+					
+						get_time_taken() ;	
+					
+						//printf("Current hour: %d\n", get_current_hour());
+						//printf("Current min: %d\n", get_current_min());
+					}
 					
 					
 					
@@ -155,15 +199,25 @@ int does_selection_match()
 	{
 		//printf("Time matches! gen hour: %d, sel hour: %d, gen min: %d, sel min: %d\n", 
 		//	generated_hour, get_selected_hour(), generated_min, get_selected_min());
-		totalTimes++;
-		correctTimes++;
-		make_background_flash();
-		generate_new_time();
+		//totalTimes++;
+		//correctTimes++;
+		goes_left--;
+		
+		if (goes_left == 0)
+		{
+			pre_game = 1;
+			render_final_screen();
+		}
+		else
+		{			
+			make_background_flash();
+			generate_new_time();
+		}
 	}
 	else
 	{
-		printf("Time does NOT match! gen hour: %d, sel hour: %d, gen min: %d, sel min: %d\n", 
-			generated_hour, get_selected_hour(), generated_min, get_selected_min());
+		//printf("Time does NOT match! gen hour: %d, sel hour: %d, gen min: %d, sel min: %d\n", 
+		//	generated_hour, get_selected_hour(), generated_min, get_selected_min());
 	}		
 }
 
@@ -172,32 +226,9 @@ void make_background_flash()
 	//blank_out_background(0, 100, SCREEN_WIDTH, 50, 0x00, 0x00, 0x80);
 	//blank_out_background((SCREEN_WIDTH/2)-75, 100, 150, 50, fontColor);	
 	render_correct_text();
-	SDL_Delay(2000);
+	SDL_Delay(500);
 	//blank_out_background(0, 100, SCREEN_WIDTH, 50, 0xb0, 0xc4, 0xde);
 	blank_out_background((SCREEN_WIDTH/2)-75, 100, 150, 50, backgroundColor);
-}
-
-int run() {
-	
-	SDL_Event event;
-	//int workDone = 0;	
-	
-	while (Running) {
-		
-		//printf("running...\n");
-		while (SDL_PollEvent(&event))
-		{
-			//workDone = 1;
-			events(&event);	
-			//loop();
-			//render();
-		}
-		//if (workDone == 0)
-		SDL_Delay(100);
-		//SDL_WaitEvent();
-			//sleep(1);
-		//workDone = 0;
-	}
 }
 
 int generate_new_time() {		
@@ -216,8 +247,25 @@ int generate_new_time() {
 	len = hourMinToStr(generated_hour, generated_min, timeToDisplay);
 	render_digital_clock();
 	render_score();
+	render_timer();
 	//check hand collision
 	
+}
+
+double get_time_taken() 
+{
+	double elapsed;
+	time (&end);
+	
+	//printf("start time: %s, end time: %s\n", ctime(&start), ctime(&end));
+	
+	//elapsed = (double) (end - start) / CLOCKS_PER_SEC;
+	elapsed = difftime (end,start);
+	return elapsed;
+		
+	//printf("start: %s, now: %s", ctime(&start), ctime(&end));
+	//printf("elapsed: %f\n", elapsed);
+	//printf("clockpersec: %s\n", CLOCKS_PER_SEC);
 }
 
 void blank_out_background(int x, int y, int w, int h, SDL_Color *col)
@@ -232,7 +280,7 @@ void blank_out_background(int x, int y, int w, int h, SDL_Color *col)
 				col->g, 
 				col->b);
 	SDL_FillRect(screen, &rect, color);
-	SDL_Flip(screen);
+	//SDL_Flip(screen);
 }
 
 void display_new_time()
@@ -240,7 +288,7 @@ void display_new_time()
 	pre_game = 0;
 	//blank_out_background(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0xc4, 0xde);
 	blank_out_background(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, backgroundColor);
-	render_score();
+	render_score();	
 	generate_new_time();
 	init_clock_face(screen, SCREEN_WIDTH, SCREEN_HEIGHT);		
 }
@@ -248,7 +296,7 @@ void display_new_time()
 void render_digital_clock() {
 	//SDL_Surface* textSurface = TTF_RenderText_Shaded(font, "Press return...", foregroundColor, backgroundColor);
 	//blank_out_background(0, 50, SCREEN_WIDTH, 50, 0x1e, 0x90, 0xff);
-	blank_out_background(0, 50, SCREEN_WIDTH, 50, backgroundColor);	
+	//blank_out_background(0, 50, SCREEN_WIDTH, 50, backgroundColor);	
 	
 	
 	//Box behind text box (to create border effect)
@@ -263,7 +311,7 @@ void render_digital_clock() {
 	SDL_Rect textLocation = { 50, (SCREEN_HEIGHT/2)+20, 0, 0 };
 	
 	//SDL_Color foregroundColor = { 255, 255, 255 }; 
-	//SDL_Color backgroundColor = { 0, 0, 255 };		
+	//SDL_Color backgroundColor = { 0, 0, 255 };			
 	
 	SDL_Surface* textSurface = TTF_RenderText_Blended(biggerFont, timeToDisplay, *fontColor);
 	
@@ -271,9 +319,52 @@ void render_digital_clock() {
 	SDL_Flip(screen);
 	
 	SDL_FreeSurface(textSurface);	
+		
 }
 
+void render_timer_bg() {
+	
+	blank_out_background(20, 20, 250, 140, fontColor);
+	
+	//Box behind text box (to create border effect)
+	blank_out_background(25, 25, 240, 130, backgroundColor);
+	
+	SDL_Flip(screen);
+}
+
+void render_timer() {
+
+	//blank_out_background(0, 50, SCREEN_WIDTH, 50, backgroundColor);	
+		
+	//blank_out_background(20, 20, 250, 140, fontColor);
+	//blank_out_background(25, 25, 240, 130, backgroundColor);
+	
+	blank_out_background(50, 40, 210, 40, backgroundColor);
+	
+	SDL_Rect textLocation = { 50, 40, 0, 0 };		
+	
+	double time = get_time_taken();
+	char str[50];
+	//char* scoreStr;
+	itoa(time, str); //This will need enhancing to convert double if decimal places need to be displayed.
+	strcat (str," seconds");
+	
+	//strcat ( char * destination, const char * source );
+	
+	SDL_Surface* textSurface = TTF_RenderText_Blended(font, str, *fontColor);
+	
+	SDL_BlitSurface(textSurface, NULL, screen, &textLocation);	
+	
+	SDL_Flip(screen);
+	
+	SDL_FreeSurface(textSurface);	
+		
+	//render_score_new();	
+}
+/*
 void render_score() {
+	
+	render_score_new();
 	
 	//blank_out_background(0, 0, SCREEN_WIDTH, 50, 0x1e, 0x90, 0xff);	
 	blank_out_background(0, 0, SCREEN_WIDTH, 50, backgroundColor);
@@ -282,6 +373,7 @@ void render_score() {
 	//blank_out_background(0, 50, SCREEN_WIDTH, 50);
 	// Pass zero for width and height to draw the whole surface 
 	SDL_Rect textLocation = { SCREEN_WIDTH-200, 20, 0, 0 };
+	//SDL_Rect textLocation = { 50, 80, 0, 0 };
 	
 	//SDL_Color foregroundColor = { 255, 255, 255 }; 
 	//SDL_Color backgroundColor = { 0, 255, 255 };		
@@ -289,7 +381,7 @@ void render_score() {
 	//char* scoreStr;
 	
 	//Convert to function that can append strings and convert ints to string (i.e. itoa if I can figure it out!)
-	char scoreStr[50];
+	/*char scoreStr[50];
 	scoreStr[0] = 'S';
 	scoreStr[1] = 'c';
 	scoreStr[2] = 'o';
@@ -305,13 +397,57 @@ void render_score() {
 	scoreStr[12] = totalTimes + '0';
 	scoreStr[13] = '\0';
 	//char* startStr = "Correct: ";
-	char* totalStr;	
+	//char* totalStr;	
 	//itoa(correct,totalStr);
 	//char * scoreStr = malloc(snprintf(NULL, 0, "%s %s", startStr, totalStr) + 1);
 	//scoreStr = "Correct: " + totalStr;
 	
+	char str[50], correctStr[3], totalStr[3];	
+	
+	itoa(correctTimes, correctStr);
+	itoa(totalTimes, totalStr);
+	
+	//char* scoreStr;
+	//itoa(time, str); //This will need enhancing to convert double if decimal places need to be displayed.
+	strcat (str," Score ");
+	strcat (str, correctStr);
+	strcat (str," of ");
+	strcat (str, totalStr);
+	
 	//SDL_Surface* textSurface = TTF_RenderText_Blended(font, "Correct: " + correct + " of " + total, foregroundColor);
-	SDL_Surface* textSurface = TTF_RenderText_Blended(font, scoreStr, *fontColor);
+	SDL_Surface* textSurface = TTF_RenderText_Blended(font, str, *fontColor);
+	
+	SDL_BlitSurface(textSurface, NULL, screen, &textLocation);
+	SDL_Flip(screen);
+	
+	SDL_FreeSurface(textSurface);	
+}
+*/
+
+void render_score() {
+	
+	blank_out_background(50, 80, 210, 40, backgroundColor);
+	
+	SDL_Rect textLocation = { 50, 80, 0, 0 };
+
+	char str[50], correctStr[3], totalStr[3];	
+	
+	itoa(correctTimes, correctStr);
+	itoa(totalTimes, totalStr);
+	
+	//strcat (str,"Goes: ");
+	
+	//char goes_str[2];
+	//char* scoreStr;
+	itoa(goes_left, str); 
+	
+	strcat (str," goes left");
+	
+	//strcat (str, goes_str);
+	//strcat (str," of ");
+	//strcat (str, totalStr);
+	
+	SDL_Surface* textSurface = TTF_RenderText_Blended(font, str, *fontColor);
 	
 	SDL_BlitSurface(textSurface, NULL, screen, &textLocation);
 	SDL_Flip(screen);
@@ -337,6 +473,54 @@ void render_welcome_screen() {
 	welcomeStr2 = "analogue clock . Press return...";
 	
 	SDL_Surface* textSurface = TTF_RenderText_Blended(font, welcomeStr, *fontColor);	
+	SDL_BlitSurface(textSurface, NULL, screen, &textLocation);	
+	
+	SDL_Surface* textSurface2 = TTF_RenderText_Blended(font, welcomeStr2, *fontColor);	
+	SDL_BlitSurface(textSurface2, NULL, screen, &textLocation2);	
+	
+	SDL_Flip(screen);
+	
+	SDL_FreeSurface(textSurface);	
+	SDL_FreeSurface(textSurface2);	
+}
+
+void render_final_screen() {
+	
+	blank_out_background(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, backgroundColor);
+	
+	SDL_Rect textLocation = { 100, 200, 0, 0 };
+	SDL_Rect textLocation2 = { 100, 230, 0, 0 };
+	
+	//SDL_Color foregroundColor = { 255, 255, 255 }; 
+	//SDL_Color backgroundColor = { 0, 255, 255 };		
+		
+	//char* welcomeStr;	
+	char* welcomeStr2;
+	
+	/*
+	double time = get_time_taken();
+	char str[50];
+	//char* scoreStr;
+	itoa(time, str); //This will need enhancing to convert double if decimal places need to be displayed.
+	strcat (str," seconds");
+	*/	
+	
+	char time_str[5];
+	double time = get_time_taken();
+	itoa(time, time_str);
+	
+	char str[50];
+	//char* str;
+	//str = "All Done. You took ";
+	//strcat (str,"All Done. You took ");
+	strcpy (str,"All Done. You took ");
+	strcat (str, time_str);
+	strcat (str," seconds.");
+	
+	//welcomeStr = "All done you took...";
+	welcomeStr2 = "Press return to go again...";
+	
+	SDL_Surface* textSurface = TTF_RenderText_Blended(font, str, *fontColor);	
 	SDL_BlitSurface(textSurface, NULL, screen, &textLocation);	
 	
 	SDL_Surface* textSurface2 = TTF_RenderText_Blended(font, welcomeStr2, *fontColor);	
@@ -395,7 +579,7 @@ int getMinute()
 	//x = get_random();
 	//x = srand ( (unsigned int)time ( NULL ) );
 	//x = srand(100);
-	printf("x=%d\n", x);
+	//printf("x=%d\n", x);
 	m = x % 59;
 	
 	//Calculate remainder and round to nearest 5
@@ -485,7 +669,7 @@ int hourMinToStr(int h, int m, char* s)
 	if (i == 4)
 		s[4] = 0;
 		//s[4] = '\0';
-	printf("0=%d, 1=%d, 2=%d, 3=%d, 4=%d, 5=%d, i=%d, time: %s\n", s[0] - '0', s[1] - '0', s[2] - '0', s[3] - '0', s[4] - '0', s[5] - '0', i, s);
+	//printf("0=%d, 1=%d, 2=%d, 3=%d, 4=%d, 5=%d, i=%d, time: %s\n", s[0] - '0', s[1] - '0', s[2] - '0', s[3] - '0', s[4] - '0', s[5] - '0', i, s);
 	return i;
 }
 

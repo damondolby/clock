@@ -3,9 +3,11 @@
 #include <SDL/SDL_ttf.h>
 # include <math.h>
 #include "common.h"
+#include <time.h>
 
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
+#define MAX_GOES 2
 
 //64-224-208
 
@@ -20,6 +22,10 @@ int correctTimes = 0;
 int totalTimes = 0;
 int mouse_x;
 int mouse_y;
+int goes_left;
+//time_t start_time;
+//clock_t start, end;
+time_t start,end;
 //SDL_Color foregroundColor = { 255, 255, 255 };	
 //SDL_Color* backgroundColor2;		
 //Uint32 bg_top = SDL_MapRGB(screen->format, 0x1e, 0x90, 0xff);
@@ -31,14 +37,18 @@ int generated_min;
 
 
 int init();
-int events(SDL_Event *event);
 int run();
+int events(SDL_Event *event);
 int generate_new_time();
+double get_time_taken();
 void blank_out_background(int x, int y, int w, int h, SDL_Color* col);
 void display_new_time();
 void render_digital_clock();
 void render_score();
+void render_timer_bg();
+void render_timer();
 void render_welcome_screen();
+void render_final_screen();
 void render_correct_text();
 int cleanup() ;
 int getHour();
