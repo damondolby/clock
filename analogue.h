@@ -37,8 +37,9 @@ int event_count; /*Event count when dragging a hand*/
 void draw_pixel(int x, int y, Uint32 color);
 void write_clock_text(char* txt, TTF_Font* font, int x, int y);
 void add_numbers();
-void add_hand(hand* h);
+coords * point_new(int x, int y);
 void remove_hand(hand* h);
+void draw_hands();
 void draw_hand(hand* h, Uint32 color);
 void draw_face();                                                                                
 void init_clock_face(SDL_Surface *screen, int scr_wid, int scr_hi);
