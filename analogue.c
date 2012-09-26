@@ -89,6 +89,7 @@ void handle_mouse_move(int x, int y) {
 	}
 }
 
+/*Returns the hour that the hour hand currently points to*/
 int get_selected_hour() {
 	
 	//Slight hack as 0 makes no sense when comparing hours to a digital clock (will always expect to be 12). Possibly a better way to do this?
@@ -98,6 +99,7 @@ int get_selected_hour() {
 		return clockface->hour->minute/5;
 }
 
+/*Returns the minute that the minute hand currently points to*/
 int get_selected_min() {
 	
 	//Slight hack as 60 makes no sense when comparing minutes to a digital clock (will always expect to be 0). Possibly a better way to do this?
