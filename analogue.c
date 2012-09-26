@@ -89,6 +89,24 @@ void handle_mouse_move(int x, int y) {
 	}
 }
 
+int get_selected_hour() {
+	
+	//Slight hack as 0 makes no sense when comparing hours to a digital clock (will always expect to be 12). Possibly a better way to do this?
+	if (clockface->hour->minute == 0)
+		return 12;
+	else
+		return clockface->hour->minute/5;
+}
+
+int get_selected_min() {
+	
+	//Slight hack as 60 makes no sense when comparing minutes to a digital clock (will always expect to be 0). Possibly a better way to do this?
+	if (clockface->minute->minute == 60)
+		return 0;
+	else
+		return clockface->minute->minute;
+}
+
 /*Draws the clock face circle outline*/
 void draw_face() {
 	
@@ -318,24 +336,6 @@ int convert_angle_to_clock_minute(float angle) {
 	}
 	
 	return minute;		
-}
-
-int get_selected_hour() {
-	
-	//Slight hack as 0 makes no sense when comparing hours to a digital clock (will always expect to be 12). Possibly a better way to do this?
-	if (clockface->hour->minute == 0)
-		return 12;
-	else
-		return clockface->hour->minute/5;
-}
-
-int get_selected_min() {
-	
-	//Slight hack as 60 makes no sense when comparing minutes to a digital clock (will always expect to be 0). Possibly a better way to do this?
-	if (clockface->minute->minute == 60)
-		return 0;
-	else
-		return clockface->minute->minute;
 }
 
 

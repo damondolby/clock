@@ -39,6 +39,8 @@ void init_clock_face(SDL_Surface *screen, int scr_wid, int scr_hi);
 void handle_mouse_down(int x, int y);
 void handle_mouse_up(int x, int y);
 void handle_mouse_move(int x, int y);
+int get_selected_hour();
+int get_selected_min();
 
 /*Internal functions to analogue.c*/
 void draw_face();
@@ -53,6 +55,4 @@ void remove_hand(hand* h);
 int hand_collision(int x, int y, hand* h);
 float get_angle_from_coords(int x, int y);
 int convert_angle_to_clock_minute(float angle);
-int get_selected_hour();
-int get_selected_min();
 
