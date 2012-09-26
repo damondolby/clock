@@ -35,36 +35,20 @@ clock *clockface;
 int event_count; /*Event count when dragging a hand*/
 
 void draw_pixel(int x, int y, Uint32 color);
-
 void write_clock_text(char* txt, TTF_Font* font, int x, int y);
-
 void add_numbers();
-
 void add_hand(hand* h);
-
 void remove_hand(hand* h);
-
 void draw_hand(hand* h, Uint32 color);
-
-void draw_face();
-                                                                                
+void draw_face();                                                                                
 void init_clock_face(SDL_Surface *screen, int scr_wid, int scr_hi);
-
 int hand_collision(int x, int y, hand* h);
-
 void handle_mouse_down(int x, int y);
-
 float get_angle_from_coords(int x, int y);
-
 int convert_angle_to_clock_minute(float angle);
-
 void move_hand(int x, int y, hand *h);
-
 void handle_mouse_up(int x, int y);
-
 void handle_mouse_move(int x, int y);
-
 int get_selected_hour();
-
 int get_selected_min();
 
