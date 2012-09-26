@@ -37,7 +37,7 @@ void display_new_time();
 void render_digital_clock();
 void render_timer_bg();
 void render_timer();
-void render_score();
+void render_goesleft();
 void render_welcome_screen();
 void render_final_screen();
 void render_correct_text();

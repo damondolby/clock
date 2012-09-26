@@ -149,6 +149,7 @@ int events(SDL_Event *event) {
 	}
 }
 
+/*Do the analogue and digital clocks match*/
 int does_selection_match() {
 	int retVal = 0;
 	
@@ -193,7 +194,7 @@ int generate_new_time() {
 	generated_min = get_minute();
 	len = hour_min_to_str(generated_hour, generated_min, time_to_display);
 	render_digital_clock();
-	render_score();
+	render_goesleft();
 	render_timer();	
 }
 
@@ -220,15 +221,20 @@ void blank_out_background(int x, int y, int w, int h, SDL_Color *col) {
 	SDL_FillRect(screen, &rect, color);
 }
 
-/*Generate/Render/Display new digital clock*/
+/*Generate/Render/Display new digital clock
+
+TODO: Consider refactoring 3 functions: "display_new_time", "render_digital_clock", "generate_new_time".
+Not sure why 3 functions are required to effectively do slightly different aspects of generating the digital clock (some legacy reason!).
+*/
 void display_new_time() {
 	pre_game = 0;
 	blank_out_background(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, background_color);
-	render_score();	
+	render_goesleft();	
 	generate_new_time();
 	init_clock_face(screen, SCREEN_WIDTH, SCREEN_HEIGHT);		
 }
 
+/*Renders the digital clock. Assumes a new time (hour/min) has been generated prior to call. */
 void render_digital_clock() {	
 	
 	//Box behind digital clock (to create border effect)
@@ -246,6 +252,7 @@ void render_digital_clock() {
 	SDL_FreeSurface(textSurface);			
 }
 
+/*Blanks out the old timer (i.e. "6 seconds") so it can be updated with new X seconds*/
 void render_timer_bg() {
 	
 	blank_out_background(20, 20, 250, 140, font_color);
@@ -256,6 +263,7 @@ void render_timer_bg() {
 	SDL_Flip(screen);
 }
 
+/*Renders the text that shows how many seconds have currently elapsed.*/
 void render_timer() {
 	
 	blank_out_background(50, 40, 210, 40, background_color);
@@ -277,7 +285,8 @@ void render_timer() {
 	SDL_FreeSurface(textSurface);	
 }
 
-void render_score() {
+/*Renders the text that displays how many goes the user has left*/
+void render_goesleft() {
 	
 	blank_out_background(50, 80, 210, 40, background_color);
 	
@@ -322,6 +331,7 @@ void render_welcome_screen() {
 	SDL_FreeSurface(textSurface2);	
 }
 
+/*Renders screen that says how many seconds it took once goes left is complete (i.e. zero)*/
 void render_final_screen() {
 	
 	blank_out_background(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, background_color);
@@ -354,6 +364,7 @@ void render_final_screen() {
 	SDL_FreeSurface(textSurface2);	
 }
 
+/*Renders the text that displays to the user that they matched the analogue clock to the digital clock correctly*/
 void render_correct_text() {	
 	blank_out_background(25, (SCREEN_HEIGHT/2)+5, 190, 130, font_color);
 	
@@ -377,12 +388,14 @@ int cleanup() {
 	SDL_Quit();
 }
 
+/*Randomly generates a new hour (i.e. int between 1 and 12)*/
 int get_hour() {
 	int x;
 	x = rand(); // everytime it is different because the seed is different.
 	return (x % 12) + 1;
 }
 
+/*Randomly generates a new minute (i.e. int between 0 and 59)*/
 int get_minute() {
 	int x, m, r;
 	char s;	
