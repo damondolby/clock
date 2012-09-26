@@ -5,6 +5,104 @@
 #include <SDL/SDL_ttf.h>
 #include "analogue.h"
 
+/*Initialise function that draws the clock face with hands and numbers.*/
+void init_clock_face(SDL_Surface *screen, int scr_wid, int scr_hi) {	    
+	
+	if((clockface = malloc(sizeof *clockface)) != NULL) {	  
+		 if((clockface->centre = malloc(sizeof *clockface->centre)) != NULL) {
+			//From radius and screen width/height set centre of the circle rx and ry
+			//Circle is two thirds of the way across the screen.
+			clockface->centre->x = (scr_wid/3)*2;
+			clockface->centre->y = scr_hi - RADIUS - 20;		
+			clockface->screen = screen;
+			clockface->color = SDL_MapRGB(clockface->screen->format, font_color->r, font_color->g, font_color->b);
+		}		
+	  }
+	
+	//TODO: can clockface be passed around here now?
+	draw_face();
+	  
+	if((clockface->hour = malloc(sizeof *clockface->hour)) != NULL) {	  
+		clockface->hour->minute = 15;
+		clockface->hour->radius = RADIUS-75;
+		clockface->hour->color = SDL_MapRGB(clockface->screen->format, font_color->r, font_color->g, font_color->b);
+	  }
+	  
+	if((clockface->minute = malloc(sizeof *clockface->minute)) != NULL) {	  
+		clockface->minute->minute = 40;
+		clockface->minute->radius = RADIUS-50;
+		clockface->minute->color = SDL_MapRGB(clockface->screen->format, font_color->r, font_color->g, font_color->b);
+	  }
+	  
+	  draw_hands();
+	  	  
+	  add_numbers();
+}
+
+/*Works out if any hand is closer enough to the mouse cursor (x,y) (usually called when the mouse button is pressed)*/
+void handle_mouse_down(int x, int y) {
+	
+	int is_collision;
+	is_collision = hand_collision(x, y, clockface->hour);
+	if (is_collision == 0)
+		is_collision = hand_collision(x, y, clockface->minute);
+	
+	if (is_collision == 1)
+		event_count = 0;
+}
+
+/*Hand that was just being moved gets redrawn to its 'final' destination */
+void handle_mouse_up(int x, int y) {	
+	
+	if (clockface->hour->is_moving == 1) {
+		//Move hour hand
+		move_hand(x, y, clockface->hour);
+		clockface->hour->is_moving = 0;
+	}
+	else if (clockface->minute->is_moving == 1) {
+		//Move minute hand
+		move_hand(x, y, clockface->minute);
+		clockface->minute->is_moving = 0;
+	}
+	
+	draw_hands();
+}
+
+/*Redraw the hand that is currently moving but only every EVENT_SKIP events (uses too much CPU to redraw after every event).*/
+void handle_mouse_move(int x, int y) {	
+	event_count++;
+	
+	//Only move for every X events (as too slow to try and move for every event)
+	if (event_count % EVENT_SKIP == 0) {
+		if (clockface != NULL) {
+			if (clockface->hour->is_moving == 1) {
+				//Move hour hand
+				move_hand(x, y, clockface->hour);
+			}
+			else if (clockface->minute->is_moving == 1) {
+				//Move minute hand
+				move_hand(x, y, clockface->minute);
+			}
+			
+			draw_hands();
+		}
+	}
+}
+
+/*Draws the clock face circle outline*/
+void draw_face() {
+	
+	/* draw a circle.  The constant M_PI is defined from math.h. */
+	float i;
+											
+	for (i=0; i<2*M_PI; i+=0.01) {
+		int xc = clockface->centre->x + RADIUS*cos(i);
+		int yc = clockface->centre->y + RADIUS*sin(i);
+		draw_pixel(xc, yc, clockface->color);
+	  }
+}
+
+
 /*Draw one pixel - useful for plotting clock face circle outline and hands*/
 void draw_pixel(int x, int y, Uint32 color) {
 	
@@ -66,18 +164,6 @@ void draw_pixel(int x, int y, Uint32 color) {
 	SDL_UpdateRect(clockface->screen, x, y, 1, 1);
 }
 
-/*Write text using specified font at specified location (x,y)*/
-void write_clock_text(char* txt, TTF_Font* font, int x, int y) {	
-	
-	SDL_Rect textLocation = { x, y, 0, 0 };	
-	
-	SDL_Surface* textSurface = TTF_RenderText_Blended(font, txt, *font_color);	
-
-	SDL_BlitSurface(textSurface, NULL, clockface->screen, &textLocation);
-	SDL_Flip(clockface->screen);	
-	SDL_FreeSurface(textSurface);
-}
-
 /*Add the 12 hours to the clock face*/
 void add_numbers() {
 	int i, r;	
@@ -107,19 +193,16 @@ void add_numbers() {
 	TTF_CloseFont(font);
 }
 
-/*Create a new x,y point struct*/
-coords * point_new(int x, int y) {
-	coords *c;
-	if((c = malloc(sizeof *c)) != NULL) {
-		c->x = x;
-		c->y = y;
-	}
-	return c;
-}
+/*Write text using specified font at specified location (x,y)*/
+void write_clock_text(char* txt, TTF_Font* font, int x, int y) {	
+	
+	SDL_Rect textLocation = { x, y, 0, 0 };	
+	
+	SDL_Surface* textSurface = TTF_RenderText_Blended(font, txt, *font_color);	
 
-/*Remove hands by drawing over the current hand with the clock background colour, so it 'disappears'*/
-void remove_hand(hand* h) {
-	draw_hand(h,  SDL_MapRGB(clockface->screen->format, background_color->r, background_color->g, background_color->b));
+	SDL_BlitSurface(textSurface, NULL, clockface->screen, &textLocation);
+	SDL_Flip(clockface->screen);	
+	SDL_FreeSurface(textSurface);
 }
 
 /*Draw (or redraw) the hour and minute hands*/
@@ -148,50 +231,34 @@ void draw_hand(hand* h, Uint32 color) {
 	}
 }
 
-/*Draws the clock face circle outline*/
-void draw_face() {
-	
-	/* draw a circle.  The constant M_PI is defined from math.h. */
-	float i;
-											
-	for (i=0; i<2*M_PI; i+=0.01) {
-		int xc = clockface->centre->x + RADIUS*cos(i);
-		int yc = clockface->centre->y + RADIUS*sin(i);
-		draw_pixel(xc, yc, clockface->color);
-	  }
+/*Create a new x,y point struct*/
+coords * point_new(int x, int y) {
+	coords *c;
+	if((c = malloc(sizeof *c)) != NULL) {
+		c->x = x;
+		c->y = y;
+	}
+	return c;
 }
- 
-/*Initialise function that draws the clock face with hands and numbers.*/
-void init_clock_face(SDL_Surface *screen, int scr_wid, int scr_hi) {	    
-	if((clockface = malloc(sizeof *clockface)) != NULL) {	  
-		 if((clockface->centre = malloc(sizeof *clockface->centre)) != NULL) {
-			//From radius and screen width/height set centre of the circle rx and ry
-			//Circle is two thirds of the way across the screen.
-			clockface->centre->x = (scr_wid/3)*2;
-			clockface->centre->y = scr_hi - RADIUS - 20;		
-			clockface->screen = screen;
-			clockface->color = SDL_MapRGB(clockface->screen->format, font_color->r, font_color->g, font_color->b);
-		}		
-	  }
+
+/*Move hand to new location based on x,y coord that can be at any point on the circle radius.
+Resulting minute of clock gets rounded to nearest 5 (i.e. minute hand can only get moved to every 5 minute segment
+and hour hand can only get moved to every 1 hour segment of the clockface).
+*/
+void move_hand(int x, int y, hand *h) {
 	
-	//TODO: can clockface be passed around here now?
-	draw_face();
-	  
-	if((clockface->hour = malloc(sizeof *clockface->hour)) != NULL) {	  
-		clockface->hour->minute = 15;
-		clockface->hour->radius = RADIUS-75;
-		clockface->hour->color = SDL_MapRGB(clockface->screen->format, font_color->r, font_color->g, font_color->b);
-	  }
-	  
-	if((clockface->minute = malloc(sizeof *clockface->minute)) != NULL) {	  
-		clockface->minute->minute = 40;
-		clockface->minute->radius = RADIUS-50;
-		clockface->minute->color = SDL_MapRGB(clockface->screen->format, font_color->r, font_color->g, font_color->b);
-	  }
-	  
-	  draw_hands();
-	  	  
-	  add_numbers();
+	float angle = get_angle_from_coords(x, y);
+	int minute = round5(convert_angle_to_clock_minute(angle));
+
+	//TODO: better way to remove hands?
+	remove_hand(h);
+		
+	h->minute = minute;
+}
+
+/*Remove hands by drawing over the current hand with the clock background colour, so it 'disappears'*/
+void remove_hand(hand* h) {
+	draw_hand(h,  SDL_MapRGB(clockface->screen->format, background_color->r, background_color->g, background_color->b));
 }
 
 /*If the co-ordinates are 'close' to either clock hands then return to true as 'colliding'*/
@@ -210,18 +277,6 @@ int hand_collision(int x, int y, hand* h) {
 		}
 	} 
 	return r;
-}
-
-/*Works out if any hand is closer enough to the mouse cursor (x,y) (usually called when the mouse button is pressed)*/
-void handle_mouse_down(int x, int y) {
-	
-	int is_collision;
-	is_collision = hand_collision(x, y, clockface->hour);
-	if (is_collision == 0)
-		is_collision = hand_collision(x, y, clockface->minute);
-	
-	if (is_collision == 1)
-		event_count = 0;
 }
 
 /*Returns polar coordinate angle (-iPI to +PI) from cartesian coordinates (i.e. x, y)*/
@@ -264,60 +319,6 @@ int convert_angle_to_clock_minute(float angle) {
 	
 	return minute;		
 }
-
-/*Move hand to new location based on x,y coord that can be at any point on the circle radius.
-Resulting minute of clock gets rounded to nearest 5 (i.e. minute hand can only get moved to every 5 minute segment
-and hour hand can only get moved to every 1 hour segment of the clockface).
-*/
-void move_hand(int x, int y, hand *h) {
-	
-	float angle = get_angle_from_coords(x, y);
-	int minute = round5(convert_angle_to_clock_minute(angle));
-
-	//TODO: better way to remove hands?
-	remove_hand(h);
-		
-	h->minute = minute;
-}
-
-/*Hand that was just being moved gets redrawn to its 'final' destination */
-void handle_mouse_up(int x, int y) {	
-	
-	if (clockface->hour->is_moving == 1) {
-		//Move hour hand
-		move_hand(x, y, clockface->hour);
-		clockface->hour->is_moving = 0;
-	}
-	else if (clockface->minute->is_moving == 1) {
-		//Move minute hand
-		move_hand(x, y, clockface->minute);
-		clockface->minute->is_moving = 0;
-	}
-	
-	draw_hands();
-}
-
-/*Redraw the hand that is currently moving but only every EVENT_SKIP events (uses too much CPU to redraw after every event).*/
-void handle_mouse_move(int x, int y) {	
-	event_count++;
-	
-	//Only move for every X events (as too slow to try and move for every event)
-	if (event_count % EVENT_SKIP == 0) {
-		if (clockface != NULL) {
-			if (clockface->hour->is_moving == 1) {
-				//Move hour hand
-				move_hand(x, y, clockface->hour);
-			}
-			else if (clockface->minute->is_moving == 1) {
-				//Move minute hand
-				move_hand(x, y, clockface->minute);
-			}
-			
-			draw_hands();
-		}
-	}
-}
-
 
 int get_selected_hour() {
 	
