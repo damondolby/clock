@@ -1,0 +1,17 @@
+Clock
+======
+
+Clock is a simple C game that where the player has to match the time on a digital display to that on an analogue clock.
+
+The initial idea was to create an aid to help a child learn to tell the time. But, with the introduction of the timer, it is also fun to see how quickly a player can complete X goes in.
+
+The Game
+------------------------------------------------
+The digital clock will display a time rounded to 5 minute intervals. Match the time on the analogue clock. 
+Press 'Return' to skip a time.
+The total number of goes is set by the constant MAX_GOES in clock.h
+
+Other
+------------------------------------------------
+As is probably apparent, this is my first attemp at a program in C.
+
