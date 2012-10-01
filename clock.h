@@ -7,7 +7,7 @@
 
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
-#define MAX_GOES 2
+#define MAX_GOES 5
 
 int running;
 int pre_game = 1;
